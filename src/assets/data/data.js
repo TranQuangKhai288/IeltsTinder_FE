@@ -1,0 +1,136 @@
+import {
+  RedCookingIcon,
+  RedKaraokeIcon,
+  RedPhotographyIcon,
+  RedShoppingIcon,
+  RedTennisIcon,
+  RedYogaIcon,
+  RedRunIcon,
+  RedSwimmingIcon,
+  RedArtIcon,
+  RedTravelingIcon,
+  RedExtremeIcon,
+  RedMusicIcon,
+  RedDrinkIcon,
+  WhiteCookingIcon,
+  WhiteKaraokeIcon,
+  WhitePhotographyIcon,
+  WhiteShoppingIcon,
+  WhiteTennisIcon,
+  WhiteYogaIcon,
+  WhiteRunIcon,
+  WhiteSwimmingIcon,
+  WhiteArtIcon,
+  WhiteTravelingIcon,
+  WhiteExtremeIcon,
+  WhiteMusicIcon,
+  WhiteDrinkIcon,
+  WhiteVideoGameIcon,
+  RedGameIcon,
+} from "../../constants/icons";
+
+export const interests = [
+  {
+    id: 1,
+    name: "Photography",
+    focusedIcon: WhitePhotographyIcon,
+    icon: RedPhotographyIcon,
+  },
+  {
+    id: 2,
+    name: "Shopping",
+    focusedIcon: WhiteShoppingIcon,
+    icon: RedShoppingIcon,
+  },
+  {
+    id: 3,
+    name: "Karaoke",
+    focusedIcon: WhiteKaraokeIcon,
+    icon: RedKaraokeIcon,
+  },
+  {
+    id: 4,
+    name: "Yoga",
+    focusedIcon: WhiteYogaIcon,
+    icon: RedYogaIcon,
+  },
+  {
+    id: 5,
+    name: "Cooking",
+    focusedIcon: WhiteCookingIcon,
+    icon: RedCookingIcon,
+  },
+  {
+    id: 6,
+    name: "Tennis",
+    focusedIcon: WhiteTennisIcon,
+    icon: RedTennisIcon,
+  },
+  {
+    id: 7,
+    name: "Run",
+    focusedIcon: WhiteRunIcon,
+    icon: RedRunIcon,
+  },
+  {
+    id: 8,
+    name: "Swimming",
+    focusedIcon: WhiteSwimmingIcon,
+    icon: RedSwimmingIcon,
+  },
+  {
+    id: 9,
+    name: "Art",
+    focusedIcon: WhiteArtIcon,
+    icon: RedArtIcon,
+  },
+  {
+    id: 10,
+    name: "Traveling",
+    focusedIcon: WhiteTravelingIcon,
+    icon: RedTravelingIcon,
+  },
+  {
+    id: 11,
+    name: "Extreme",
+    focusedIcon: WhiteExtremeIcon,
+    icon: RedExtremeIcon,
+  },
+  {
+    id: 12,
+    name: "Music",
+    focusedIcon: WhiteMusicIcon,
+    icon: RedMusicIcon,
+  },
+  {
+    id: 13,
+    name: "Drink",
+    focusedIcon: WhiteDrinkIcon,
+    icon: RedDrinkIcon,
+  },
+  {
+    id: 14,
+    name: "Video Game",
+    focusedIcon: WhiteVideoGameIcon,
+    icon: RedGameIcon,
+  },
+];
+
+export const gender = [
+  {
+    id: 1,
+    name: "Woman",
+  },
+  {
+    id: 2,
+    name: "Man",
+  },
+  {
+    id: 3,
+    name: "Other",
+  },
+  {
+    id: 4,
+    name: "I don't want to mention it",
+  },
+];
