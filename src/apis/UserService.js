@@ -1,6 +1,7 @@
 import baseURL from "./Customize-axios";
 
 export const loginUser = async (data) => {
+  console.log("data", data);
   const res = await baseURL.post(`/user/login`, data);
   return res;
 };

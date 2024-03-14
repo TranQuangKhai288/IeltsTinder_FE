@@ -1,5 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   Image,
   TouchableOpacity,
   Platform,
+  KeyboardAvoidingView,
+  ScrollView,
 } from "react-native";
 import {
   ChevronLeftIcon,
@@ -19,13 +21,14 @@ import { EllipsisHorizontalIcon } from "react-native-heroicons/solid";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
+import * as MessageService from "../apis/MessageService";
 const android = Platform.OS === "android";
 const ios = Platform.OS === "ios";
-
 const ChatRoomScreen = ({ route }) => {
   const user = useSelector((state) => state.user);
-  const { avatar, name, messagesData } = route.params;
-
+  const { avatar, name, chatRoomId } = route.params;
+  const [message, setMessage] = useState("");
+  const [messagesData, setMessagesData] = useState([]);
   const navigation = useNavigation();
 
   const checkIsSender = (item) => {
@@ -33,6 +36,30 @@ const ChatRoomScreen = ({ route }) => {
       return true;
     } else {
       return false;
+    }
+  };
+
+  const fetchMessages = async () => {
+    const response = await MessageService.getAllMessageForaChat(
+      chatRoomId,
+      user.access_token
+    );
+    setMessagesData(response.data);
+  };
+  useEffect(() => {
+    fetchMessages();
+  }, []);
+
+  const handleSentMessage = () => {
+    if (message !== "") {
+      const response = MessageService.sendMessage(
+        message,
+        chatRoomId,
+        user.access_token
+      );
+      if (response) {
+        setMessage("");
+      }
     }
   };
 
@@ -145,6 +172,8 @@ const ChatRoomScreen = ({ route }) => {
               fontWeight: "medium",
             }}
             className="flex-1 text-base mb-1 pl-1 tracking-wider"
+            value={message}
+            onChangeText={(text) => setMessage(text)}
           />
 
           <View className="flex-row justify-center items-center space-x-1">
@@ -153,9 +182,12 @@ const ChatRoomScreen = ({ route }) => {
           </View>
         </View>
 
-        <View className="bg-blue-500 rounded-2xl py-3 w-[13%] justify-center items-center ">
+        <TouchableOpacity
+          onPress={() => handleSentMessage()}
+          className="bg-blue-500 rounded-2xl py-3 w-[13%] justify-center items-center "
+        >
           <PaperAirplaneIcon color={"white"} />
-        </View>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );

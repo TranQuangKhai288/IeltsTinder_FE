@@ -1,5 +1,5 @@
 import { View, Text, Dimensions, TouchableOpacity, Image } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Carousal from "react-native-snap-carousel";
 import DatesCard from "../components/DatesCard";
@@ -10,9 +10,27 @@ import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 const android = Platform.OS === "android";
 const { width, height } = Dimensions.get("window");
 import { useSelector } from "react-redux";
+import io from "socket.io-client";
 
 const HomeScreen = ({ navigation }) => {
   const user = useSelector((state) => state.user);
+  useEffect(() => {
+    const socket = io("http://192.168.1.10:5000"); // Thay đổi 'http://your-backend-server-url' thành URL của máy chủ của bạn
+
+    if (user) {
+      socket.on("connect", () => {
+        console.log("Connected to server");
+      });
+    } else {
+      socket.on("disconnect", () => {
+        console.log("Disconnected from server");
+      });
+    }
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
   return (
     <SafeAreaView
       className="bg-white flex-1 justify-between"

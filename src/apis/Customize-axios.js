@@ -2,7 +2,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const instance = axios.create({
-  baseURL: "http://192.168.1.6:5000/api",
+  baseURL: "http://192.168.1.10:5000/api",
 });
 
 export default instance;
@@ -28,8 +28,7 @@ instance.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
-    console.log("Access token expired. Trying to refresh token");
-
+    console.log("error", error.response.data.message);
     if (error.response.data.message === "jwt expired") {
       try {
         console.log("calling refresh token");

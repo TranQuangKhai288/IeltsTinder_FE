@@ -23,7 +23,6 @@ export const getChatList = createAsyncThunk(
   async (access_token, thunkAPI) => {
     try {
       const response = await ChatService.getChatList(access_token);
-      console.log(response, "response ChatList");
       return response.data;
     } catch (error) {
       console.log(error);

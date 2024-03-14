@@ -12,17 +12,12 @@ import Matches from "../components/matches";
 import { MagnifyingGlassIcon } from "react-native-heroicons/outline";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { useNavigation } from "@react-navigation/native";
-import { useSelector, useDispatch } from "react-redux";
-import { fetchMessages } from "../redux/slice/messageSlice";
-
+import { useSelector } from "react-redux";
 const android = Platform.OS === "android";
 
 const ChatScreen = () => {
   const navigation = useNavigation();
   const user = useSelector((state) => state.user);
-
-  const messages = useSelector((state) => state.messages);
-  const dispatch = useDispatch();
   const checkNameofChat = (item) => {
     if (item.users[0].name === user.userData.name) {
       return item.users[1].name;
@@ -38,19 +33,12 @@ const ChatScreen = () => {
       return item.users[0].avatar;
     }
   };
-
-  useEffect(() => {
-    if (messages.messages.length > 0) {
-      navigation.navigate("ChatRoomScreen", {
-        avatar: checkAvatarofChat(messages.inChat),
-        name: checkNameofChat(messages.inChat),
-        messagesData: messages.messages,
-      });
-    }
-  }, [messages]);
-
-  const handleChatRoom = (item) => {
-    dispatch(fetchMessages(item._id));
+  const handleChatRoom = async (item) => {
+    navigation.navigate("ChatRoomScreen", {
+      avatar: checkAvatarofChat(item),
+      name: checkNameofChat(item),
+      chatRoomId: item._id,
+    });
   };
 
   return (
