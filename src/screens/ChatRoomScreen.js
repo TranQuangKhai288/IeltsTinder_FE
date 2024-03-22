@@ -22,6 +22,7 @@ import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
 import * as MessageService from "../apis/MessageService";
+import { getSocket } from "../socketIO/SocketService";
 const android = Platform.OS === "android";
 const ios = Platform.OS === "ios";
 const ChatRoomScreen = ({ route }) => {
@@ -30,7 +31,7 @@ const ChatRoomScreen = ({ route }) => {
   const [message, setMessage] = useState("");
   const [messagesData, setMessagesData] = useState([]);
   const navigation = useNavigation();
-
+  const socket = getSocket();
   const checkIsSender = (item) => {
     if (item.sender.name === user.userData.name) {
       return true;
@@ -50,18 +51,52 @@ const ChatRoomScreen = ({ route }) => {
     fetchMessages();
   }, []);
 
+  useEffect(() => {
+    if (socket) {
+      socket.emit("addUser", user.userData._id);
+    }
+  }, [socket]);
+
   const handleSentMessage = () => {
     if (message !== "") {
+      socket.emit("sendMessage", {
+        senderId: user.userData._id,
+        receiverId: chatRoomId,
+        content: message,
+      });
+
       const response = MessageService.sendMessage(
         message,
         chatRoomId,
         user.access_token
       );
       if (response) {
+        setMessagesData([
+          ...messagesData,
+          {
+            content: message,
+            sender: { name: user.userData.name },
+            timestamp: new Date().toLocaleTimeString(),
+          },
+        ]);
         setMessage("");
       }
     }
   };
+
+  useEffect(() => {
+    socket.on("getMessage", (data) => {
+      console.log(data, "data");
+      setMessagesData([
+        ...messagesData,
+        {
+          content: data.content,
+          sender: { name: user.userData.name },
+          timestamp: new Date().toLocaleTimeString(),
+        },
+      ]);
+    });
+  }, [messagesData]);
 
   return (
     <SafeAreaView
@@ -128,11 +163,26 @@ const ChatRoomScreen = ({ route }) => {
               <View
                 style={{
                   // width: checkIsSender(item) ? "60%" : "70%",
+                  display: "flex",
+                  flexDirection: checkIsSender(item) ? "row-reverse" : "row",
                   width: "auto",
                   maxWidth: checkIsSender(item) ? "70%" : "70%",
                 }}
-                className=""
+                className="align-bottom justify-end items-end"
               >
+                {!checkIsSender(item) ? (
+                  <Image
+                    source={{ uri: avatar }}
+                    style={{
+                      width: hp(3),
+                      height: hp(3),
+                      marginRight: 12,
+                    }}
+                    className="rounded-full"
+                  />
+                ) : (
+                  <></>
+                )}
                 <View
                   style={{
                     borderBottomRightRadius: checkIsSender(item) ? 0 : 10,
