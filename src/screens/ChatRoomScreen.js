@@ -22,9 +22,12 @@ import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
 import * as MessageService from "../apis/MessageService";
-import { getSocket } from "../socketIO/SocketService";
+import { getSocket, joinRoom } from "../socketIO/SocketService";
 const android = Platform.OS === "android";
 const ios = Platform.OS === "ios";
+
+var selectedChatCompare;
+
 const ChatRoomScreen = ({ route }) => {
   const user = useSelector((state) => state.user);
   const { avatar, name, chatRoomId } = route.params;
@@ -46,6 +49,7 @@ const ChatRoomScreen = ({ route }) => {
       user.access_token
     );
     setMessagesData(response.data);
+    joinRoom(chatRoomId);
   };
   useEffect(() => {
     fetchMessages();
@@ -57,46 +61,32 @@ const ChatRoomScreen = ({ route }) => {
     }
   }, [socket]);
 
-  const handleSentMessage = () => {
-    if (message !== "") {
-      socket.emit("sendMessage", {
-        senderId: user.userData._id,
-        receiverId: chatRoomId,
-        content: message,
-      });
+  useEffect(() => {
+    if (socket) {
+      const messageListener = (newMessageReceived) => {
+        setMessagesData((prev) => [...prev, newMessageReceived]);
+      };
 
-      const response = MessageService.sendMessage(
+      socket.on("receive-message", messageListener);
+
+      return () => {
+        socket.off("receive-message", messageListener);
+      };
+    }
+  }, [socket]);
+  const handleSentMessage = async () => {
+    if (message !== "") {
+      const response = await MessageService.sendMessage(
         message,
         chatRoomId,
         user.access_token
       );
-      if (response) {
-        setMessagesData([
-          ...messagesData,
-          {
-            content: message,
-            sender: { name: user.userData.name },
-            timestamp: new Date().toLocaleTimeString(),
-          },
-        ]);
+      if (response.status === "OK") {
         setMessage("");
+        socket.emit("new-message", response.data);
       }
     }
   };
-
-  useEffect(() => {
-    socket.on("getMessage", (data) => {
-      console.log(data, "data");
-      setMessagesData([
-        ...messagesData,
-        {
-          content: data.content,
-          sender: { name: user.userData.name },
-          timestamp: new Date().toLocaleTimeString(),
-        },
-      ]);
-    });
-  }, [messagesData]);
 
   return (
     <SafeAreaView

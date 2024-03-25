@@ -28,14 +28,13 @@ instance.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
-    console.log("error", error.response.data.message);
     if (error.response.data.message === "jwt expired") {
       try {
-        console.log("calling refresh token");
+        //console.log("calling refresh token");
         const result = await instance.post(`/user/refresh-token`, {
           withCredentials: true,
         });
-        console.log("Refresh token result", result.access_token);
+        //console.log("Refresh token result", result.access_token);
         const access_token = result.access_token;
         originalRequest.headers["token"] = `Bearer ${access_token}`;
         return instance(originalRequest);

@@ -9,14 +9,12 @@ export const getAllMessageForaChat = async (chatId, access_token) => {
   return res;
 };
 
-export const sendMessage = async (message, chatId, access_token) => {
-  console.log("chatId", chatId);
-  console.log("message", message);
+export const sendMessage = async (message, chatRoomId, access_token) => {
   const res = await baseURL.post(
     `/message/`,
     {
       content: message,
-      chatId: chatId,
+      chatId: chatRoomId,
     },
     {
       headers: {

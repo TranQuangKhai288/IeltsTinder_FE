@@ -5,7 +5,11 @@ import LoginScreen from "../screens/LoginScreen";
 import WelcomeScreen from "../screens/WelcomeScreen";
 import ChatRoomScreen from "../screens/ChatRoomScreen";
 const stack = createStackNavigator();
-import { connectSocket, disconnectSocket } from "../socketIO/SocketService";
+import {
+  connectSocket,
+  disconnectSocket,
+  setupSocket,
+} from "../socketIO/SocketService";
 import { useSelector } from "react-redux";
 
 const Stack = () => {
@@ -15,10 +19,8 @@ const Stack = () => {
     if (user?.userData?._id) {
       console.log("connect socket");
       connectSocket();
+      setupSocket(user.userData);
     }
-    return () => {
-      disconnectSocket();
-    };
   }, [user]);
   return (
     <stack.Navigator

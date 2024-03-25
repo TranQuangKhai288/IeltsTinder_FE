@@ -25,3 +25,15 @@ export const disconnectSocket = () => {
 export const getSocket = () => {
   return socket;
 };
+
+export const setupSocket = (user) => {
+  if (socket) {
+    socket.emit("setup", user);
+  }
+};
+
+export const joinRoom = (room) => {
+  if (socket) {
+    socket.emit("join-a-chat-room", room);
+  }
+};
