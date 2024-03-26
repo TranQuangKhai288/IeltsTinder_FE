@@ -2,7 +2,7 @@
 
 import io from "socket.io-client";
 
-const ENDPOINT = "http://192.168.1.5:5000";
+const ENDPOINT = "http://192.168.1.9:5000";
 let socket;
 export const connectSocket = () => {
   socket = io(ENDPOINT);

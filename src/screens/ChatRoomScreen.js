@@ -17,6 +17,7 @@ import {
   PaperAirplaneIcon,
   PhotoIcon,
 } from "react-native-heroicons/outline";
+
 import { EllipsisHorizontalIcon } from "react-native-heroicons/solid";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -26,13 +27,14 @@ import { getSocket, joinRoom } from "../socketIO/SocketService";
 const android = Platform.OS === "android";
 const ios = Platform.OS === "ios";
 
-var selectedChatCompare;
-
 const ChatRoomScreen = ({ route }) => {
   const user = useSelector((state) => state.user);
   const { avatar, name, chatRoomId } = route.params;
   const [message, setMessage] = useState("");
   const [messagesData, setMessagesData] = useState([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [typing, setTyping] = useState(false);
+
   const navigation = useNavigation();
   const socket = getSocket();
   const checkIsSender = (item) => {
@@ -41,6 +43,30 @@ const ChatRoomScreen = ({ route }) => {
     } else {
       return false;
     }
+  };
+
+  let virtualMessage = {
+    __v: 0,
+    _id: "-1",
+    chat: {
+      __v: 0,
+      _id: "0",
+      chatName: "sender",
+      createdAt: "0000",
+      isGroupChat: false,
+      latestMessage: "0000",
+      updatedAt: "0000",
+      users: ["1", "2"],
+    },
+    content: "Typing...",
+    createdAt: "0",
+    readBy: [],
+    sender: {
+      _id: "-2",
+      name: "virtualUser",
+    },
+    timestamp: "0",
+    updatedAt: "0",
   };
 
   const fetchMessages = async () => {
@@ -87,6 +113,61 @@ const ChatRoomScreen = ({ route }) => {
       }
     }
   };
+
+  useEffect(() => {
+    if (socket) {
+      socket.emit("addUser", user.userData._id);
+    }
+  }, [isTyping]);
+
+  //handle typing
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("typing", () => {
+        console.log("received typing");
+        setIsTyping(true);
+      });
+
+      socket.on("stop-typing", () => {
+        console.log("received stop typing");
+        setIsTyping(false);
+      });
+    }
+
+    return () => {
+      if (socket) {
+        socket.emit("stop-typing", chatRoomId);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log("isTyping", isTyping);
+    if (isTyping) {
+      setMessagesData((prev) => [...prev, virtualMessage]);
+    } else {
+      setMessagesData((prev) => prev.filter((message) => message._id !== "-1"));
+    }
+  }, [isTyping]);
+
+  const handleTyping = (text) => {
+    setMessage(text);
+  };
+
+  useEffect(() => {
+    console.log("messaage", message);
+    if (message !== "" && !typing) {
+      console.log("typing");
+      socket.emit("typing", chatRoomId);
+      setTyping(true);
+    }
+    if (message === "" && typing) {
+      console.log("stop typing");
+      socket.emit("stop-typing", chatRoomId);
+      setTyping(false);
+    }
+  }, [message]);
 
   return (
     <SafeAreaView
@@ -173,21 +254,30 @@ const ChatRoomScreen = ({ route }) => {
                 ) : (
                   <></>
                 )}
-                <View
-                  style={{
-                    borderBottomRightRadius: checkIsSender(item) ? 0 : 10,
-                    borderBottomLeftRadius: checkIsSender(item) ? 10 : 0,
-                    backgroundColor: checkIsSender(item)
-                      ? "#3B82F6"
-                      : "#171717",
-                    padding: 10,
-                    borderRadius: 10,
-                  }}
-                >
-                  <Text className="text-white text-base leading-5 ">
-                    {item.content}
-                  </Text>
-                </View>
+
+                {item?._id === "-1" ? (
+                  <View>
+                    <Text className="text-white text-base leading-5 ">
+                      {item.content}
+                    </Text>
+                  </View>
+                ) : (
+                  <View
+                    style={{
+                      borderBottomRightRadius: checkIsSender(item) ? 0 : 10,
+                      borderBottomLeftRadius: checkIsSender(item) ? 10 : 0,
+                      backgroundColor: checkIsSender(item)
+                        ? "#3B82F6"
+                        : "#171717",
+                      padding: 10,
+                      borderRadius: 10,
+                    }}
+                  >
+                    <Text className="text-white text-base leading-5 ">
+                      {item.content}
+                    </Text>
+                  </View>
+                )}
 
                 {/* {checkIsSender(item) && (
                   <Text className="text-xs font-semibold text-neutral-500 text-right">
@@ -202,6 +292,7 @@ const ChatRoomScreen = ({ route }) => {
       </View>
 
       {/* Text Input  */}
+
       <View className="absolute flex-row justify-between items-center w-full px-4 pb-12 pt-2 bg-white bottom-0">
         <View className="flex-row items-center rounded-2xl bg-neutral-200 px-3 py-3 w-[85%] ">
           <TextInput
@@ -213,7 +304,7 @@ const ChatRoomScreen = ({ route }) => {
             }}
             className="flex-1 text-base mb-1 pl-1 tracking-wider"
             value={message}
-            onChangeText={(text) => setMessage(text)}
+            onChangeText={handleTyping}
           />
 
           <View className="flex-row justify-center items-center space-x-1">
