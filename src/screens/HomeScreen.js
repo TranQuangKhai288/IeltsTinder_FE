@@ -1,5 +1,13 @@
-import { View, Text, Dimensions, TouchableOpacity, Image } from "react-native";
-import React, { useEffect } from "react";
+import {
+  View,
+  Text,
+  Dimensions,
+  TouchableOpacity,
+  Image,
+  FlatList,
+  StyleSheet,
+} from "react-native";
+import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Carousal from "react-native-snap-carousel";
@@ -9,67 +17,27 @@ import { BellIcon } from "react-native-heroicons/outline";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 const android = Platform.OS === "android";
 const { width, height } = Dimensions.get("window");
+import { data } from "../data/Data";
+import Reels from "../components/Reels";
+import VideoItem from "../components/VideoItem";
 
 const HomeScreen = ({ navigation }) => {
   const user = useSelector((state) => state.user);
+  const video = useRef(null);
   return (
-    <SafeAreaView
-      className="bg-white flex-1 justify-between"
-      style={{
-        paddingTop: android ? hp(2) : 0,
-      }}
-    >
-      {/* Header */}
-      <View className="w-full flex-row justify-between items-center px-4 mb-8">
-        <View className="rounded-full items-center justify-center">
-          <Image
-            source={{ uri: user.userData.avatar }}
-            style={{
-              width: hp(4.5),
-              height: hp(4.5),
-              resizeMode: "cover",
-            }}
-            className="rounded-full"
-          />
-        </View>
-
-        <View>
-          <Text className="text-xl font-semibold text-center uppercase">
-            STACKS Dates
-          </Text>
-        </View>
-
-        {/* Heart Icon */}
-        <View className="bg-black/10 p-2 rounded-full items-center justify-center">
-          <TouchableOpacity>
-            <BellIcon size={25} strokeWidth={2} color="black" />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Carousal */}
-      <View className=" pb-4">
-        <View className="mx-4 mb-4">
-          <Text className="capitalize text-2xl font-semibold">
-            Find your love
-          </Text>
-        </View>
-
-        <View className="">
-          <Carousal
-            data={datesData}
-            renderItem={({ item }) => <DatesCard item={item} />}
-            firstItem={1}
-            inactiveSlideScale={0.86}
-            inactiveSlideOpacity={0.6}
-            sliderWidth={width}
-            itemWidth={width * 0.8}
-            slideStyle={{ display: "flex", alignItems: "center" }}
-          />
-        </View>
-      </View>
-    </SafeAreaView>
+    <View style={styles.container}>
+      <VideoItem data={data} />
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    width: width,
+    height: height,
+    position: "relative",
+    backgroundColor: "red",
+  },
+});
 
 export default HomeScreen;

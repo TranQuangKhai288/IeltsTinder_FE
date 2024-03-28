@@ -24,12 +24,11 @@ const Stack = () => {
   }, [user]);
   return (
     <stack.Navigator
-      screenOptions={() => ({
-        header: () => {
-          null;
-        },
-      })}
-      initialRouteName={user?.userData?._id ? "BottomTab" : "WelcomeScreen"}
+      screenOptions={{
+        headerShown: false,
+      }}
+      initialRouteName="BottomTab"
+      //initialRouteName={user?.userData?._id ? "BottomTab" : "WelcomeScreen"}
     >
       <stack.Screen name="BottomTab" component={BottomTab} />
       <stack.Screen name="LoginScreen" component={LoginScreen} />
