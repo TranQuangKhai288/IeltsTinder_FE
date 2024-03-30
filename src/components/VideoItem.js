@@ -14,28 +14,32 @@ import Ionic from "react-native-vector-icons/Ionicons";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import Feather from "react-native-vector-icons/Feather";
 const android = Platform.OS === "android";
+const windowWidth = Dimensions.get("window").width;
+const windowHeight = Dimensions.get("window").height;
 
-const VideoItem = ({ data }) => {
+const VideoItem = ({ data, isActive }) => {
   const { uri, caption, channelName, musicName, likes, comments, avatarUri } =
-    data[0];
+    data;
+
   const [like, setLike] = useState(false);
-  const windowWidth = Dimensions.get("window").width;
-  const windowHeight = Dimensions.get("window").height;
 
   const bottomTabBarHeight = useBottomTabBarHeight();
-
   return (
     <View
       style={[
         styles.container,
-        { marginBottom: android ? 0 : bottomTabBarHeight },
+        {
+          height: android
+            ? windowHeight - 4
+            : windowHeight - bottomTabBarHeight,
+        },
       ]}
     >
       <Video
         source={{ uri: uri }}
         resizeMode="cover"
-        shouldPlay
         isLooping
+        shouldPlay={isActive}
         style={styles.video}
       />
 
@@ -73,12 +77,19 @@ const VideoItem = ({ data }) => {
                   }}
                 />
               </View>
-              <Text style={{ color: "white", fontSize: 16 }}>
+              <Text style={{ color: "white", fontSize: 24, fontWeight: 600 }}>
                 {channelName}
               </Text>
             </View>
           </TouchableOpacity>
-          <Text style={{ color: "white", fontSize: 14, marginHorizontal: 10 }}>
+          <Text
+            style={{
+              color: "white",
+              fontSize: 16,
+              marginHorizontal: 10,
+              fontWeight: 600,
+            }}
+          >
             {caption}
           </Text>
           <View style={{ flexDirection: "row", padding: 10 }}>
@@ -173,9 +184,7 @@ const VideoItem = ({ data }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    position: "relative",
-    backgroundColor: "green",
+    width: windowWidth,
   },
   video: {
     position: "absolute",

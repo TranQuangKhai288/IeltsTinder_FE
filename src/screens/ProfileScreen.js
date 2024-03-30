@@ -1,92 +1,102 @@
-import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
 import React from "react";
+import { View, Text, ScrollView } from "react-native";
+import { ProfileBody, ProfileButtons } from "../components/ProfileBody";
 import {
-  heightPercentageToDP as hp,
-  widthPercentageToDP as wp,
-} from "react-native-responsive-screen";
-import { CameraIcon } from "react-native-heroicons/outline";
-import { profileData } from "../dataTestUI";
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import Entypo from "react-native-vector-icons/Entypo";
+import BottomTabView from "../components/BottomTabView";
+import { datesData, matchesData } from "../dataTestUI";
+const ProfileScreen = () => {
+  let circuls = [];
+  let numberofcircels = 10;
 
-const ProfileScreen = ({ navigation }) => {
-  const data = profileData[0];
+  for (let index = 0; index < numberofcircels; index++) {
+    circuls.push(
+      <View key={index}>
+        {index === 0 ? (
+          <View
+            style={{
+              width: 60,
+              height: 60,
+              borderRadius: 100,
+              borderWidth: 1,
+              opacity: 0.7,
+              marginHorizontal: 5,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Entypo name="plus" style={{ fontSize: 40, color: "black" }} />
+          </View>
+        ) : (
+          <View
+            style={{
+              width: 60,
+              height: 60,
+              borderRadius: 100,
+              backgroundColor: "black",
+              opacity: 0.1,
+              marginHorizontal: 5,
+            }}
+          ></View>
+        )}
+      </View>
+    );
+  }
+
+  const insets = useSafeAreaInsets();
   return (
-    <ScrollView
-      className="relative bg-white flex-1"
-      contentContainerStyle={{
-        paddingBottom: hp(5),
+    <View
+      style={{
+        width: "100%",
+        height: "100%",
+        backgroundColor: "white",
+        paddingTop: insets.top,
+        paddingLeft: insets.left,
+        paddingRight: insets.right,
       }}
     >
-      {/* Image */}
-      <View>
-        <Image
-          source={data.imgUrl}
-          style={{
-            width: wp(100),
-            height: hp(60),
-            borderBottomLeftRadius: 30,
-            borderBottomRightRadius: 30,
-          }}
+      <View style={{ width: "100%", padding: 10 }}>
+        <ProfileBody
+          name="Mr Peobody"
+          accountName="mr_peobody"
+          profileImage={datesData[0].imgUrl}
+          followers="3.6M"
+          following="35"
+          post="458"
+        />
+        <ProfileButtons
+          id={0}
+          name="Mr Peobody"
+          accountName="mr_peobody"
+          profileImage={datesData[1].imgUrl}
         />
       </View>
-
-      {/* Header */}
-      <View className="w-full absolute flex-row justify-end items-center pt-10">
-        <View className="p-2 rounded-full bg-black/40 mr-5 justify-center items-center">
-          <CameraIcon size={hp(3.5)} color="white" strokeWidth={1.5} />
-        </View>
+      <View>
+        <Text
+          style={{
+            padding: 10,
+            letterSpacing: 1,
+            fontSize: 14,
+          }}
+        >
+          Story Highlights
+        </Text>
+        <ScrollView
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
+          style={{
+            paddingVertical: 5,
+            paddingHorizontal: 10,
+          }}
+        >
+          {circuls}
+        </ScrollView>
       </View>
-
-      {/* Bio */}
-      <View className="w-full justify-start items-start px-6 space-y-4 mt-6">
-        {/* User name and age */}
-        <View className="flex-row space-x-2 justify-between w-full items-center">
-          <View className="flex-row ">
-            <Text className="text-black text-center font-bold text-xl">
-              {data.name}
-              {", "}
-            </Text>
-            <Text className="text-black text-center font-bold text-xl ">
-              {data.age}
-            </Text>
-          </View>
-
-          <Text>Edit</Text>
-        </View>
-
-        {/* User hobbies */}
-        <View>
-          <View className="flex-row">
-            {data.hobbies?.map((hobby, index) => (
-              <View
-                key={index}
-                style={{
-                  borderRadius: 20,
-                  padding: 5,
-                  paddingHorizontal: 10,
-                  marginRight: 5,
-                }}
-                className="bg-[#d3d3d3]"
-              >
-                <Text className="text-black ">{hobby}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* User Bio */}
-        <View>
-          <Text className="uppercase font-semibold text-neutral-500 tracking-wider mb-2 ">
-            BIO
-          </Text>
-
-          <Text className="text-black/80 text-left font-medium text-sm">
-            {data.bio}
-          </Text>
-        </View>
-
-        {/*  */}
-      </View>
-    </ScrollView>
+      <BottomTabView />
+    </View>
   );
 };
 

@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import HomeScreen from "../screens/HomeScreen";
 import ChatScreen from "../screens/ChatScreen";
 import ProfileScreen from "../screens/ProfileScreen";
+import FriendsScreen from "../screens/FriendsScreen";
+import MenuScreen from "../screens/MenuScreen";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, AntDesign } from "@expo/vector-icons";
 const Tab = createBottomTabNavigator();
 
 const TabArr = [
@@ -17,8 +19,15 @@ const TabArr = [
     route: "Friends",
     label: "Friends",
     icon: "people",
-    component: ChatScreen,
+    component: FriendsScreen,
   },
+  // {
+  //   route: "Chatd",
+  //   label: "none",
+  //   icon: "pluscircle",
+  //   component: ChatScreen,
+  // },
+
   {
     route: "Chat",
     label: "Chat",
@@ -30,8 +39,14 @@ const TabArr = [
     route: "Profile",
     label: "Profile",
     icon: "person",
-
     component: ProfileScreen,
+  },
+
+  {
+    route: "Menu",
+    label: "Menu",
+    icon: "menu",
+    component: MenuScreen,
   },
 ];
 
@@ -57,8 +72,8 @@ const BottomTab = () => {
                 return (
                   <Ionicons
                     name={focused ? item.icon : item.icon + "-outline"}
-                    size={28}
-                    color="#fff"
+                    size={24}
+                    color={"white"}
                   />
                 );
               },
