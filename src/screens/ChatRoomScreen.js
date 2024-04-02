@@ -17,6 +17,7 @@ import {
   PaperAirplaneIcon,
   PhotoIcon,
 } from "react-native-heroicons/outline";
+import { Ionicons, AntDesign } from "@expo/vector-icons";
 
 import { EllipsisHorizontalIcon } from "react-native-heroicons/solid";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
@@ -169,6 +170,13 @@ const ChatRoomScreen = ({ route }) => {
     }
   }, [message]);
 
+  const handleVideoCall = () => {
+    navigation.navigate("VideoCallScreen", {
+      avatar,
+      name,
+    });
+  };
+
   return (
     <SafeAreaView
       className=" justify-center items-center relative bg-white"
@@ -203,14 +211,21 @@ const ChatRoomScreen = ({ route }) => {
         {/* Name */}
 
         {/* Image */}
-        <View className="w-1/3 items-end ">
-          <View className="bg-black/5 rounded-full p-1">
-            <EllipsisHorizontalIcon
-              size={hp(3)}
-              color={"black"}
-              strokeWidth={2}
-            />
-          </View>
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+          }}
+        >
+          <TouchableOpacity className="bg-black/5 rounded-full p-1">
+            <Ionicons name="call" size={hp(3)} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="bg-black/5 rounded-full p-1 ml-4"
+            onPress={handleVideoCall}
+          >
+            <Ionicons name="videocam" size={hp(3)} color="black" />
+          </TouchableOpacity>
         </View>
       </View>
 

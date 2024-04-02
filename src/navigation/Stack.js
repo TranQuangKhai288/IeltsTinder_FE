@@ -4,6 +4,7 @@ import BottomTab from "./BottomTab";
 import LoginScreen from "../screens/LoginScreen";
 import WelcomeScreen from "../screens/WelcomeScreen";
 import ChatRoomScreen from "../screens/ChatRoomScreen";
+import VideoCallScreen from "../screens/VideoCallScreen";
 const stack = createStackNavigator();
 import {
   connectSocket,
@@ -27,13 +28,14 @@ const Stack = () => {
       screenOptions={{
         headerShown: false,
       }}
-      initialRouteName="BottomTab"
-      //initialRouteName={user?.userData?._id ? "BottomTab" : "WelcomeScreen"}
+      //initialRouteName="BottomTab"
+      initialRouteName={user?.userData?._id ? "BottomTab" : "WelcomeScreen"}
     >
       <stack.Screen name="BottomTab" component={BottomTab} />
       <stack.Screen name="LoginScreen" component={LoginScreen} />
       <stack.Screen name="WelcomeScreen" component={WelcomeScreen} />
       <stack.Screen name="ChatRoomScreen" component={ChatRoomScreen} />
+      <stack.Screen name="VideoCallScreen" component={VideoCallScreen} />
     </stack.Navigator>
   );
 };
