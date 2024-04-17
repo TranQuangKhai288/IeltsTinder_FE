@@ -21,6 +21,9 @@ import FeatureComponent from "../components/FeatureComponent";
 import { ScrollView } from "react-native-gesture-handler";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 const { width, height } = Dimensions.get("window");
+import { ProfileBody, ProfileButtons } from "../components/ProfileBody";
+import { Feather } from "@expo/vector-icons";
+
 const android = Platform.OS === "android";
 import {
   camera,
@@ -39,7 +42,7 @@ const featureArray = [
   },
   {
     id: 2,
-    name: "Find your destiny",
+    name: "Random Match",
     imgUrl: match,
   },
   {
@@ -66,7 +69,7 @@ const featureArray = [
 
 const MenuScreen = () => {
   const navigation = useNavigation();
-  const user = useSelector((state) => state.user);
+  const user = useSelector((state) => state.user.userData);
   const insets = useSafeAreaInsets();
   const bottomTabBarHeight = useBottomTabBarHeight();
   return (
@@ -79,7 +82,7 @@ const MenuScreen = () => {
       }}
     >
       <View style={{ height: 40 }}>
-        <Text className="font-semibold text-white tracking-wider text-2xl mb-2">
+        <Text className="font-semibold text-white tracking-wider text-2xl mb-2 ml-2">
           Menu
         </Text>
       </View>
@@ -90,95 +93,58 @@ const MenuScreen = () => {
             : height - bottomTabBarHeight - 80,
         }}
       >
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            marginHorizontal: 10,
-            backgroundColor: "#333333",
-            padding: 10,
-            borderRadius: 10,
-          }}
-        >
+        <View>
           <View
             style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <Image
-              source={datesData[0].imgUrl}
-              style={{
-                width: 100,
-                height: 100,
-                borderRadius: 50,
-              }}
-            />
-            <Text className="font-semibold text-white tracking-wider text-xl mb-2">
-              {datesData[0].name}
-            </Text>
-          </View>
-          {/* Information */}
-          <View
-            style={{
-              display: "flex",
-              flex: 1,
               flexDirection: "row",
-              marginBottom: 32,
-              marginLeft: 64,
+              alignItems: "center",
+              justifyContent: "space-around",
+              paddingVertical: 20,
             }}
           >
-            {/* Information */}
             <View
               style={{
-                display: "flex",
-                flex: 1,
-                flexDirection: "column",
                 alignItems: "center",
-                justifyContent: "center",
               }}
             >
-              <Text className="font-semibold text-white tracking-wider text-x">
-                0
-              </Text>
-              <Text className="font-semibold text-white tracking-wider text-x">
-                Post
+              <Image
+                source={{ uri: user.avatar }}
+                style={{
+                  resizeMode: "cover",
+                  width: 80,
+                  height: 80,
+                  borderRadius: 100,
+                }}
+              />
+              <Text
+                style={{
+                  paddingVertical: 5,
+                  fontWeight: "bold",
+                  color: "white",
+                }}
+              >
+                {user.name}
               </Text>
             </View>
-            <View
-              style={{
-                display: "flex",
-                flex: 1,
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Text className="font-semibold text-white tracking-wider text-x">
-                0
+            <View style={{ alignItems: "center" }}>
+              <Text style={{ fontWeight: "bold", color: "white" }}>
+                {user.posts}
               </Text>
-              <Text className="font-semibold text-white tracking-wider text-x">
-                Follower
+              <Text style={{ fontWeight: "bold", color: "white" }}>Posts</Text>
+            </View>
+            <View style={{ alignItems: "center" }}>
+              <Text style={{ fontWeight: "bold", color: "white" }}>
+                {user.friends?.length}
+              </Text>
+              <Text style={{ fontWeight: "bold", color: "white" }}>
+                Friends
               </Text>
             </View>
-            <View
-              style={{
-                display: "flex",
-                flex: 1,
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Text className="font-semibold text-white tracking-wider text-x">
-                0
+            <View style={{ alignItems: "center" }}>
+              <Text style={{ fontWeight: "bold", color: "white" }}>
+                {user.level}
               </Text>
-              <Text className="font-semibold text-white tracking-wider text-x">
-                Follow
-              </Text>
+              <Text style={{ fontWeight: "bold", color: "white" }}>Level</Text>
             </View>
           </View>
         </View>

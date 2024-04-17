@@ -15,43 +15,63 @@ const { width, height } = Dimensions.get("window");
 import { data } from "../data/Data";
 import VideoItem from "../components/VideoItem";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import Octicons from "react-native-vector-icons/Octicons";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 const HomeScreen = ({ navigation }) => {
-  const user = useSelector((state) => state.user);
-  const video = useRef(null);
-
+  const user = useSelector((state) => state.user.userData);
   const [activeVideoIndex, setActiveVideoIndex] = useState(0);
   const bottomTabBarHeight = useBottomTabBarHeight();
+  const insets = useSafeAreaInsets();
 
   return (
     <View>
-      <SafeAreaView
+      <View
         style={{
+          display: "flex",
           position: "absolute",
           top: 0,
           left: 0,
           right: 0,
           flexDirection: "row",
-          justifyContent: "space-between",
           zIndex: 1,
-          paddingHorizontal: 30,
+          paddingHorizontal: 20,
+          paddingTop: android ? 10 : insets.top,
         }}
       >
-        <Text style={{ fontSize: 20, fontWeight: "bold", color: "white" }}>
-          Ielst Tikbook
-        </Text>
-        <View style={{ display: "flex", flexDirection: "row" }}>
-          <Octicons name="search" style={{ fontSize: 25, color: "white" }} />
-          <Octicons
-            name="bell-fill"
-            style={{ fontSize: 25, color: "white", marginLeft: 16 }}
+        <TouchableOpacity style={{ flex: 1 }}>
+          <Ionicons name="camera" style={{ fontSize: 32, color: "white" }} />
+        </TouchableOpacity>
+
+        <View
+          style={{
+            flex: 2,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Text style={{ fontSize: 24, fontWeight: "bold", color: "white" }}>
+            Ielst Tikbook
+          </Text>
+        </View>
+        <View
+          style={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "flex-end",
+            flexDirection: "row",
+          }}
+        >
+          <Ionicons name="search" style={{ fontSize: 32, color: "white" }} />
+          <Ionicons
+            name="notifications"
+            style={{ fontSize: 32, color: "white", marginLeft: 4 }}
           />
         </View>
-      </SafeAreaView>
+      </View>
       <FlatList
         data={data}
         pagingEnabled
+        keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => (
           <VideoItem data={item} isActive={activeVideoIndex === index} />
         )}
@@ -59,7 +79,6 @@ const HomeScreen = ({ navigation }) => {
           const index = Math.round(
             event.nativeEvent.contentOffset.y / (height - bottomTabBarHeight)
           );
-
           setActiveVideoIndex(index);
         }}
       />

@@ -1,50 +1,74 @@
-import React from "react";
-import { View, Text, ScrollView } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, ScrollView, Dimensions, Image } from "react-native";
 import { ProfileBody, ProfileButtons } from "../components/ProfileBody";
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import Entypo from "react-native-vector-icons/Entypo";
+import * as UserServices from "../apis/UserService";
 import BottomTabView from "../components/BottomTabView";
-import { datesData, matchesData } from "../dataTestUI";
-const ProfileScreen = () => {
-  let circuls = [];
-  let numberofcircels = 10;
+import { useSelector } from "react-redux";
 
-  for (let index = 0; index < numberofcircels; index++) {
-    circuls.push(
-      <View key={index}>
-        {index === 0 ? (
-          <View
+const ProfileScreen = () => {
+  const [circuls, setCirculs] = useState([]);
+  const user = useSelector((state) => state.user.userData);
+  const access_token = useSelector((state) => state.user.access_token);
+
+  const fetchFriendDetails = async (friendId) => {
+    const response = await UserServices.getDetailsUser(friendId, access_token);
+    if (response.status === "OK") {
+      return response.data;
+    }
+  };
+
+  // console.log(
+  //   JSON.stringify(user, (key, value) => {
+  //     if (key === "avatar") {
+  //       return "avatar uri";
+  //     }
+  //     return value;
+  //   })
+  // );
+  useEffect(() => {
+    const fetchFriendsData = async () => {
+      // Map over each friend ID and fetch their details concurrently
+      const friendDetailsPromises = user.friends.map((friendId) =>
+        fetchFriendDetails(friendId)
+      );
+      // Wait for all friend details to be fetched
+      const friendDetails = await Promise.all(friendDetailsPromises);
+      // Push friend details into circuls array
+      const newCirculs = friendDetails.map((friendDetail, index) => (
+        <View
+          key={index}
+          style={{
+            width: 70,
+            height: 70,
+            borderRadius: 100,
+            backgroundColor: "#00FF00",
+            marginHorizontal: 5,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Image
+            source={{ uri: friendDetail.avatar }}
             style={{
-              width: 60,
-              height: 60,
+              width: "95%",
+              height: "95%",
               borderRadius: 100,
-              borderWidth: 1,
-              opacity: 0.7,
-              marginHorizontal: 5,
-              justifyContent: "center",
-              alignItems: "center",
+              borderWidth: 2,
+              borderColor: "white",
             }}
-          >
-            <Entypo name="plus" style={{ fontSize: 40, color: "black" }} />
-          </View>
-        ) : (
-          <View
-            style={{
-              width: 60,
-              height: 60,
-              borderRadius: 100,
-              backgroundColor: "black",
-              opacity: 0.1,
-              marginHorizontal: 5,
-            }}
-          ></View>
-        )}
-      </View>
-    );
-  }
+          />
+        </View>
+      ));
+      setCirculs(newCirculs);
+    };
+
+    fetchFriendsData();
+  }, []);
 
   const insets = useSafeAreaInsets();
   return (
@@ -60,18 +84,18 @@ const ProfileScreen = () => {
     >
       <View style={{ width: "100%", padding: 10 }}>
         <ProfileBody
-          name="Mr Peobody"
-          accountName="mr_peobody"
-          profileImage={datesData[0].imgUrl}
-          followers="3.6M"
-          following="35"
-          post="458"
+          name={user?.name}
+          accountName={user?.name}
+          profileImage={user?.avatar}
+          friends={user?.friends?.length}
+          Level={user?.level}
+          post={user?.posts}
         />
         <ProfileButtons
           id={0}
-          name="Mr Peobody"
-          accountName="mr_peobody"
-          profileImage={datesData[1].imgUrl}
+          name={user?.name}
+          accountName={user?.name}
+          profileImage={user?.avatar}
         />
       </View>
       <View>
@@ -82,7 +106,7 @@ const ProfileScreen = () => {
             fontSize: 14,
           }}
         >
-          Story Highlights
+          Friends
         </Text>
         <ScrollView
           horizontal={true}

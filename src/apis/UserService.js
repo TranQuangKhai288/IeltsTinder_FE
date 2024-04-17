@@ -28,6 +28,42 @@ export const deleteUser = async (id, access_token, data) => {
   return res;
 };
 
+export const getFriendRequests = async (access_token) => {
+  const res = await baseURL.get(`/user/get-friend-request`, {
+    headers: {
+      token: `Bearer ${access_token}`,
+    },
+  });
+  return res;
+};
+
+export const sendFriendRequest = async (id, access_token) => {
+  const res = await baseURL.post(
+    `/user/send-friend-request`,
+    { receiverId: id },
+    {
+      headers: {
+        token: `Bearer ${access_token}`,
+      },
+    }
+  );
+
+  return res;
+};
+
+export const acceptFriendRequest = async (id, access_token) => {
+  const res = await baseURL.post(
+    `/user/accept-friend-request`,
+    { senderId: id },
+    {
+      headers: {
+        token: `Bearer ${access_token}`,
+      },
+    }
+  );
+  return res;
+};
+
 export const getAllUser = async (access_token) => {
   const res = await baseURL.get(`/user/getAll`, {
     headers: {
@@ -50,9 +86,8 @@ export const logoutUser = async () => {
   return res;
 };
 
-export const updateUser = async (id, data, access_token) => {
-  console.log("data", data);
-  const res = await baseURL.put(`/user/update-user/${id}`, data, {
+export const updateUser = async (data, access_token) => {
+  const res = await baseURL.put(`/user/update-user`, data, {
     headers: {
       token: `Bearer ${access_token}`,
     },

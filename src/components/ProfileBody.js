@@ -7,8 +7,8 @@ export const ProfileBody = ({
   accountName,
   profileImage,
   post,
-  followers,
-  following,
+  friends,
+  Level,
 }) => {
   return (
     <View>
@@ -76,7 +76,7 @@ export const ProfileBody = ({
           }}
         >
           <Image
-            source={profileImage}
+            source={{ uri: profileImage }}
             style={{
               resizeMode: "cover",
               width: 80,
@@ -98,12 +98,12 @@ export const ProfileBody = ({
           <Text>Posts</Text>
         </View>
         <View style={{ alignItems: "center" }}>
-          <Text style={{ fontWeight: "bold", fontSize: 18 }}>{followers}</Text>
-          <Text>Followers</Text>
+          <Text style={{ fontWeight: "bold", fontSize: 18 }}>{friends}</Text>
+          <Text>Friends</Text>
         </View>
         <View style={{ alignItems: "center" }}>
-          <Text style={{ fontWeight: "bold", fontSize: 18 }}>{following}</Text>
-          <Text>Following</Text>
+          <Text style={{ fontWeight: "bold", fontSize: 18 }}>{Level}</Text>
+          <Text>Level</Text>
         </View>
       </View>
     </View>
@@ -126,13 +126,13 @@ export const ProfileButtons = ({ id, name, accountName, profileImage }) => {
           }}
         >
           <TouchableOpacity
-            // onPress={() =>
-            //   navigation.push("EditProfile", {
-            //     name: name,
-            //     accountName: accountName,
-            //     profileImage: profileImage,
-            //   })
-            // }
+            onPress={() =>
+              navigation.push("EditProfile", {
+                name: name,
+                accountName: accountName,
+                profileImage: profileImage,
+              })
+            }
             style={{
               width: "100%",
             }}

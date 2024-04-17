@@ -10,10 +10,25 @@ import React from "react";
 
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { useSelector } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
 
 const FeatureComponent = ({ name, age, imgUrl }) => {
+  const navigation = useNavigation();
+  const handleFeature = () => {
+    if (name === "Ielts Practice") {
+      navigation.navigate("ListExercise");
+    } else if (name === "Random Match") {
+      navigation.navigate("FindYourDestinyScreen");
+    } else if (name === "Friends") {
+      navigation.navigate("FriendsScreen");
+    } else if (name === "Play games") {
+      navigation.navigate("PlayGamesScreen");
+    } else if (name === "Video") {
+      navigation.navigate("VideoScreen");
+    }
+  };
   return (
-    <TouchableOpacity style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={handleFeature}>
       <View>
         <View
           style={{

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import {
-  Animated,
   View,
   StyleSheet,
   Image,
@@ -29,9 +28,7 @@ const VideoItem = ({ data, isActive }) => {
       style={[
         styles.container,
         {
-          height: android
-            ? windowHeight - 4
-            : windowHeight - bottomTabBarHeight,
+          height: windowHeight - bottomTabBarHeight,
         },
       ]}
     >
@@ -106,7 +103,7 @@ const VideoItem = ({ data, isActive }) => {
       <View
         style={{
           position: "absolute",
-          bottom: 30, //edited
+          bottom: 10, //edited
           right: 0,
         }}
       >

@@ -1,23 +1,28 @@
 import React from "react";
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, Dimensions } from "react-native";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import Ionic from "react-native-vector-icons/Ionicons";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
 const BottomTabView = () => {
   const Tab = createMaterialTopTabNavigator();
 
+  const bottomHeight = useBottomTabBarHeight();
+  const Height = Dimensions.get("window").height / 3 - bottomHeight;
+  const Width = Dimensions.get("window").width / 3.3;
   let squares = [];
-  let numberOfSquare = 7;
+  let numberOfSquare = 4;
 
   for (let index = 0; index < numberOfSquare; index++) {
     squares.push(
       <View key={index}>
         <View
           style={{
-            width: 130,
+            width: Width,
             height: 150,
             marginVertical: 0.5,
             backgroundColor: "black",
+            margin: 4,
             opacity: 0.1,
           }}
         ></View>
@@ -38,13 +43,14 @@ const BottomTabView = () => {
           style={{
             width: "100%",
             height: "100%",
+            minHeight: Height,
             backgroundColor: "white",
             flexWrap: "wrap",
             flexDirection: "row",
-            paddingVertical: 5,
-            justifyContent: "space-between",
-            paddingRight: 10,
-            paddingLeft: 10,
+            paddingVertical: 4,
+            justifyContent: "flex-start",
+            paddingRight: 5,
+            paddingLeft: 5,
           }}
         >
           {squares}
@@ -65,13 +71,14 @@ const BottomTabView = () => {
           style={{
             width: "100%",
             height: "100%",
+            minHeight: Height,
             backgroundColor: "white",
             flexWrap: "wrap",
             flexDirection: "row",
-            paddingVertical: 5,
-            justifyContent: "space-between",
-            paddingRight: 10,
-            paddingLeft: 10,
+            paddingVertical: 4,
+            justifyContent: "flex-start",
+            paddingRight: 5,
+            paddingLeft: 5,
           }}
         >
           {squares}
@@ -92,13 +99,14 @@ const BottomTabView = () => {
           style={{
             width: "100%",
             height: "100%",
+            minHeight: Height,
             backgroundColor: "white",
             flexWrap: "wrap",
             flexDirection: "row",
-            paddingVertical: 5,
-            justifyContent: "space-between",
-            paddingRight: 10,
-            paddingLeft: 10,
+            paddingVertical: 4,
+            justifyContent: "flex-start",
+            paddingRight: 5,
+            paddingLeft: 5,
           }}
         >
           {squares}

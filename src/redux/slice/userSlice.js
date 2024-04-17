@@ -38,12 +38,12 @@ const initialState = {
     email: "",
     phone: "",
     friends: [],
-    chatList: [],
     notification: [],
     exercises: [],
     schedule: [],
     isAdmin: false,
   },
+  chatList: [],
   access_token: "" | null,
   refresh_token: "" | null,
 };
@@ -67,7 +67,7 @@ const userSlice = createSlice({
       state.access_token = action.meta.arg.access_token;
     });
     builder.addCase(getChatList.fulfilled, (state, action) => {
-      state.userData.chatList = action.payload;
+      state.chatList = action.payload;
     });
     builder.addCase(getChatList.rejected, (state, action) => {
       state.userData.chatList = action.payload;

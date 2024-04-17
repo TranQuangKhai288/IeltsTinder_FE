@@ -8,10 +8,12 @@ import {
 import Entypo from "react-native-vector-icons/Entypo";
 import TabExercise from "../components/ComponentTabPractice/TabExercise";
 import { datesData, matchesData } from "../dataTestUI";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import { useNavigation } from "@react-navigation/native";
 const ListExercise = () => {
   let circuls = [];
   let numberofcircels = 10;
-
+  const navigation = useNavigation();
   for (let index = 0; index < numberofcircels; index++) {
     circuls.push(
       <View key={index}>
@@ -52,12 +54,26 @@ const ListExercise = () => {
       style={{
         width: "100%",
         height: "100%",
-        backgroundColor: "black",
+        backgroundColor: "white",
         paddingTop: insets.top,
         paddingLeft: insets.left,
         paddingRight: insets.right,
       }}
     >
+      <Text
+        style={{
+          fontWeight: "bold",
+          color: "black",
+          fontSize: 20,
+          marginBottom: 10,
+        }}
+        onPress={() => {
+          navigation.goBack();
+        }}
+      >
+        Go back
+      </Text>
+
       <TabExercise />
     </View>
   );

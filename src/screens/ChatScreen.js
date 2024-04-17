@@ -17,9 +17,10 @@ const android = Platform.OS === "android";
 
 const ChatScreen = () => {
   const navigation = useNavigation();
-  const user = useSelector((state) => state.user);
+  const user = useSelector((state) => state.user.userData);
+  const chatList = useSelector((state) => state.user.chatList);
   const checkNameofChat = (item) => {
-    if (item.users[0].name === user.userData.name) {
+    if (item.users[0].name === user.name) {
       return item.users[1].name;
     } else {
       return item.users[0].name;
@@ -27,7 +28,7 @@ const ChatScreen = () => {
   };
 
   const checkAvatarofChat = (item) => {
-    if (item.users[0].name === user.userData.name) {
+    if (item.users[0].name === user.name) {
       return item.users[1].avatar;
     } else {
       return item.users[0].avatar;
@@ -80,7 +81,7 @@ const ChatScreen = () => {
         </View>
 
         <FlatList
-          data={user.userData.chatList}
+          data={chatList}
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
             <TouchableOpacity

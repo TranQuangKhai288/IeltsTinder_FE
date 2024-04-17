@@ -22,12 +22,38 @@ import { ScrollView } from "react-native-gesture-handler";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 const { width, height } = Dimensions.get("window");
 const android = Platform.OS === "android";
+import * as UserService from "../apis/UserService";
 
 const FriendsScreen = () => {
   const navigation = useNavigation();
-  const user = useSelector((state) => state.user);
+  const access_token = useSelector((state) => state.user.access_token);
   const insets = useSafeAreaInsets();
   const bottomTabBarHeight = useBottomTabBarHeight();
+  const [friendRequests, setFriendRequests] = useState([]);
+
+  const getFriendRequests = async () => {
+    const response = await UserService.getFriendRequests(access_token);
+    if (response.status === "OK") {
+      setFriendRequests(response.data);
+    }
+  };
+
+  useEffect(() => {
+    getFriendRequests();
+  }, []);
+
+  // useEffect(() => {
+  //   console.log(
+  //     JSON.stringify(friendRequests, (key, value) => {
+  //       if (key === "avatar") {
+  //         return "avatar uri";
+  //       }
+  //       return value;
+  //     }),
+  //     "friendRequests"
+  //   );
+  // }, [friendRequests]);
+
   return (
     <View
       style={{
@@ -38,7 +64,7 @@ const FriendsScreen = () => {
       }}
     >
       <View style={{ height: 40 }}>
-        <Text className="font-semibold text-white tracking-wider text-2xl mb-2">
+        <Text className="font-semibold text-white tracking-wider text-2xl mb-2 ml-4">
           Friends
         </Text>
       </View>
@@ -58,13 +84,14 @@ const FriendsScreen = () => {
         {/* end of header */}
 
         {/* Friend Request */}
-        {datesData?.map((friend, index) => {
+        {friendRequests?.map((request, index) => {
           return (
             <FriendRequest
               key={index}
-              name={friend.name}
-              age={friend.age}
-              imgUrl={friend.imgUrl}
+              id={request.senderId._id}
+              name={request.senderId.name}
+              level={request.senderId.level}
+              avatar={request.senderId.avatar}
             />
           );
         })}
