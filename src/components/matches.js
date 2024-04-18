@@ -32,17 +32,17 @@ const Matches = () => {
     fetchFriendsData();
   }, []);
 
-  useEffect(() => {
-    console.log(
-      JSON.stringify(friends, (key, value) => {
-        if (key === "avatar") {
-          return "avatar uri";
-        }
-        return value;
-      }),
-      "friends"
-    );
-  }, [friends]);
+  // useEffect(() => {
+  //   console.log(
+  //     JSON.stringify(friends, (key, value) => {
+  //       if (key === "avatar") {
+  //         return "avatar uri";
+  //       }
+  //       return value;
+  //     }),
+  //     "friends"
+  //   );
+  // }, [friends]);
 
   return (
     <View className="mt-4">

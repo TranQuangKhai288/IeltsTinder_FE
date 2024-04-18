@@ -9,6 +9,7 @@ import ListExercise from "../screens/ListExercises";
 import ReviewPractice from "../screens/ReviewPractice";
 import PracticeScreen from "../screens/PracticeScreen";
 import EditProfile from "../screens/EditProfile";
+import CreatePostScreen from "../screens/CreateAPostScreen";
 const stack = createStackNavigator();
 import {
   connectSocket,
@@ -32,8 +33,8 @@ const Stack = () => {
       screenOptions={{
         headerShown: false,
       }}
-      //initialRouteName="BottomTab"
-      initialRouteName={user?.userData?._id ? "BottomTab" : "WelcomeScreen"}
+      initialRouteName="CreatePostScreen"
+      //initialRouteName={user?.userData?._id ? "BottomTab" : "WelcomeScreen"}
     >
       <stack.Screen name="BottomTab" component={BottomTab} />
       <stack.Screen name="LoginScreen" component={LoginScreen} />
@@ -44,6 +45,7 @@ const Stack = () => {
       <stack.Screen name="ReviewPractice" component={ReviewPractice} />
       <stack.Screen name="PracticeScreen" component={PracticeScreen} />
       <stack.Screen name="EditProfile" component={EditProfile} />
+      <stack.Screen name="CreatePostScreen" component={CreatePostScreen} />
     </stack.Navigator>
   );
 };
