@@ -17,12 +17,14 @@ import VideoItem from "../components/VideoItem";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-const HomeScreen = ({ navigation }) => {
+import { useNavigation } from "@react-navigation/native";
+const HomeScreen = () => {
   const user = useSelector((state) => state.user.userData);
   const [activeVideoIndex, setActiveVideoIndex] = useState(0);
   const bottomTabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
 
+  const navigation = useNavigation();
   return (
     <View>
       <View
@@ -38,7 +40,12 @@ const HomeScreen = ({ navigation }) => {
           paddingTop: android ? 10 : insets.top,
         }}
       >
-        <TouchableOpacity style={{ flex: 1 }}>
+        <TouchableOpacity
+          style={{ flex: 1 }}
+          onPress={() => {
+            navigation.navigate("CreatePostScreen");
+          }}
+        >
           <Ionicons name="camera" style={{ fontSize: 32, color: "white" }} />
         </TouchableOpacity>
 

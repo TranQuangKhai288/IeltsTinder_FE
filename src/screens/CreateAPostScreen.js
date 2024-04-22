@@ -16,8 +16,12 @@ import {
 import { Ionicons, Feather } from "@expo/vector-icons";
 import { FlatList, ScrollView } from "react-native-gesture-handler";
 import { LinearGradient } from "expo-linear-gradient";
+import { useSelector } from "react-redux";
 import * as ImagePicker from "expo-image-picker";
+import * as PostSerVice from "../apis/PostService";
 import BottomSheet from "@gorhom/bottom-sheet";
+import * as FileSystem from "expo-file-system";
+
 const { width, height } = Dimensions.get("window");
 
 const CreatePostScreen = () => {
@@ -60,11 +64,13 @@ const CreatePostScreen = () => {
     },
   ];
 
+  const access_token = useSelector((state) => state.user.access_token);
   const sheetRef = useRef(null);
   const snapPoints = ["10%", "40%"];
   const [iconLayout, setIconLayout] = useState("horizontal");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedImages, setSelectedImages] = useState([]);
+  const [content, setContent] = useState("");
   const flatListRef = useRef(null);
   const insets = useSafeAreaInsets();
   useEffect(() => {
@@ -88,10 +94,6 @@ const CreatePostScreen = () => {
       setSelectedImages(result.assets);
     }
   };
-
-  useEffect(() => {
-    console.log(selectedImages, "selectedImages");
-  }, [selectedImages]);
 
   const OptionComponent = ({ title }) => {
     return (
@@ -255,6 +257,15 @@ const CreatePostScreen = () => {
     flatListRef.current.scrollToIndex({ index, animated: true });
   };
 
+  const handlePost = async () => {
+    const res = await PostSerVice.addAPost(
+      content,
+      selectedImages,
+      access_token
+    );
+    console.log(res, "res");
+  };
+
   return (
     <>
       <ScrollView
@@ -288,16 +299,40 @@ const CreatePostScreen = () => {
               Create post
             </Text>
           </View>
-          <View
+          <TouchableOpacity
             style={{
               flex: 1,
               display: "flex",
-              justifyContent: "flex-end",
-              flexDirection: "row",
+              opacity: selectedImages.length ? 1 : 0.5,
+              justifyContent: "center",
+              alignItems: "center",
             }}
+            activeOpacity={1} // Ngăn chặn màu opacity khi TouchableOpacity được nhấn
+            disabled={selectedImages.length === 0}
+            onPress={handlePost}
           >
-            <Feather name="settings" style={{ fontSize: 24, color: "black" }} />
-          </View>
+            <LinearGradient
+              colors={
+                selectedImages.length
+                  ? ["#6600FF", "#FF0088"]
+                  : ["black", "black"]
+              }
+              style={[
+                styles.postButton,
+                selectedImages.length ? {} : { opacity: 0.5 },
+              ]}
+            >
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: "white",
+                  fontWeight: "bold",
+                }}
+              >
+                Post
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
         </View>
         {/* end header */}
 
@@ -322,6 +357,8 @@ const CreatePostScreen = () => {
               placeholder="What's on your mind?"
               multiline={true}
               style={styles.input}
+              value={content}
+              onChangeText={setContent}
             />
           </View>
           <FlatList
@@ -335,6 +372,7 @@ const CreatePostScreen = () => {
                   styles.imageContainer,
                   index === currentIndex && styles.activeContainer,
                 ]}
+                key={index}
               >
                 <Image source={{ uri: item.uri }} style={styles.image} />
               </View>
@@ -386,6 +424,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+
+  postButton: {
+    flex: 1,
+    height: 32,
+    width: "100%",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+  },
+
   inputContainer: {
     width: "100%",
     paddingHorizontal: 16,

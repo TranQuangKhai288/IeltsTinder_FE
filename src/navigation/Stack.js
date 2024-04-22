@@ -33,8 +33,8 @@ const Stack = () => {
       screenOptions={{
         headerShown: false,
       }}
-      initialRouteName="CreatePostScreen"
-      //initialRouteName={user?.userData?._id ? "BottomTab" : "WelcomeScreen"}
+      //initialRouteName="CreatePostScreen"
+      initialRouteName={user?.userData?._id ? "BottomTab" : "WelcomeScreen"}
     >
       <stack.Screen name="BottomTab" component={BottomTab} />
       <stack.Screen name="LoginScreen" component={LoginScreen} />
