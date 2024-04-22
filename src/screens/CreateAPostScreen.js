@@ -8,6 +8,7 @@ import {
   TextInput,
   Platform,
   Dimensions,
+  Alert,
 } from "react-native";
 import {
   SafeAreaView,
@@ -21,8 +22,9 @@ import * as ImagePicker from "expo-image-picker";
 import * as PostSerVice from "../apis/PostService";
 import BottomSheet from "@gorhom/bottom-sheet";
 import * as FileSystem from "expo-file-system";
-
 const { width, height } = Dimensions.get("window");
+import { firebase } from "../../firebaseConfig";
+import { set } from "firebase/database";
 
 const CreatePostScreen = () => {
   const featureIcons = [
@@ -71,6 +73,7 @@ const CreatePostScreen = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedImages, setSelectedImages] = useState([]);
   const [content, setContent] = useState("");
+  const [uploading, setUploading] = useState(false);
   const flatListRef = useRef(null);
   const insets = useSafeAreaInsets();
   useEffect(() => {
@@ -83,17 +86,9 @@ const CreatePostScreen = () => {
     })();
   }, []);
 
-  const pickImages = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsMultipleSelection: true,
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setSelectedImages(result.assets);
-    }
-  };
+  useEffect(() => {
+    console.log("content", content);
+  }, [content]);
 
   const OptionComponent = ({ title }) => {
     return (
@@ -257,13 +252,70 @@ const CreatePostScreen = () => {
     flatListRef.current.scrollToIndex({ index, animated: true });
   };
 
+  const pickImages = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsMultipleSelection: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setSelectedImages(result.assets);
+    }
+  };
+  //upload media files to firebase
+  const uploadMedia = async () => {
+    setUploading(true);
+    try {
+      // Duyệt qua từng ảnh trong mảng selectedImages
+      const downloadURLs = await Promise.all(
+        selectedImages.map(async (image) => {
+          const { uri } = await FileSystem.getInfoAsync(image.uri);
+          console.log("URI in upload media", uri);
+          const blob = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.onload = () => {
+              resolve(xhr.response);
+            };
+            xhr.onerror = (e) => {
+              console.log(e);
+              reject(new TypeError("Network request failed"));
+            };
+            xhr.responseType = "blob";
+            xhr.open("GET", uri, true);
+            xhr.send(null);
+          });
+          const filename = uri.split("/").pop();
+          const ref = firebase.storage().ref().child(filename);
+          const snapshot = await ref.put(blob);
+
+          // Lấy đường dẫn tải xuống (download URL) của ảnh sau khi tải lên thành công
+          return await snapshot.ref.getDownloadURL();
+        })
+      );
+
+      setUploading(false);
+      Alert.alert("Success", "Files uploaded");
+
+      // Trả về một mảng chứa đường dẫn tải xuống của tất cả các ảnh
+      return downloadURLs;
+    } catch (error) {
+      console.log("Error uploading media", error);
+      setUploading(false);
+      // Trả về null nếu có lỗi xảy ra
+      return null;
+    }
+  };
+
   const handlePost = async () => {
-    const res = await PostSerVice.addAPost(
-      content,
-      selectedImages,
-      access_token
-    );
-    console.log(res, "res");
+    const URLs = await uploadMedia();
+    const media = URLs.map((url) => {
+      return { URL: url };
+    });
+
+    console.log("Media", media);
+    const response = await PostSerVice.addAPost(content, media, access_token);
+    console.log("Response from addAPost", response);
   };
 
   return (
@@ -303,7 +355,7 @@ const CreatePostScreen = () => {
             style={{
               flex: 1,
               display: "flex",
-              opacity: selectedImages.length ? 1 : 0.5,
+              opacity: selectedImages.length || content.length ? 1 : 0.5,
               justifyContent: "center",
               alignItems: "center",
             }}
