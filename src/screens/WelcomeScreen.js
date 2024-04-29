@@ -69,7 +69,7 @@ const WelcomeScreen = ({ navigation }) => {
               fontSize: wp(10),
             }}
           >
-            Embrace
+            IELTS TINDER
           </Text>
 
           <Text
@@ -78,7 +78,7 @@ const WelcomeScreen = ({ navigation }) => {
               fontSize: wp(10),
             }}
           >
-            A New Way Of Dating
+            A New Way Of Learning English
           </Text>
 
           <Text
@@ -87,8 +87,8 @@ const WelcomeScreen = ({ navigation }) => {
               fontSize: wp(3.5),
             }}
           >
-            We combine cutting-edge technologies with a modern approach to
-            matchmaking.
+            The best way to learn English is to practice speaking with native
+            speakers.
           </Text>
         </View>
 

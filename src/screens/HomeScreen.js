@@ -18,11 +18,22 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import * as PostService from "../apis/PostService";
 const HomeScreen = () => {
   const user = useSelector((state) => state.user.userData);
   const [activeVideoIndex, setActiveVideoIndex] = useState(0);
   const bottomTabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
+  const [posts, setPosts] = useState([]);
+
+  const fetchPosts = async () => {
+    const res = await PostService.getAll();
+    setPosts(res.data);
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
   const navigation = useNavigation();
   return (
@@ -37,7 +48,7 @@ const HomeScreen = () => {
           flexDirection: "row",
           zIndex: 1,
           paddingHorizontal: 20,
-          paddingTop: android ? 10 : insets.top,
+          paddingTop: insets.top || 20,
         }}
       >
         <TouchableOpacity
@@ -76,11 +87,16 @@ const HomeScreen = () => {
         </View>
       </View>
       <FlatList
-        data={data}
+        data={posts}
         pagingEnabled
+        bar
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => (
-          <VideoItem data={item} isActive={activeVideoIndex === index} />
+          <VideoItem
+            data={item}
+            isActive={activeVideoIndex === index}
+            key={index}
+          />
         )}
         onScroll={(event) => {
           const index = Math.round(
@@ -88,6 +104,8 @@ const HomeScreen = () => {
           );
           setActiveVideoIndex(index);
         }}
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
       />
     </View>
   );

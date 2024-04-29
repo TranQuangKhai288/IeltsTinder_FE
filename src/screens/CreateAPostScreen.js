@@ -10,6 +10,7 @@ import {
   Dimensions,
   Alert,
 } from "react-native";
+import { Video } from "expo-av";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -25,6 +26,7 @@ import * as FileSystem from "expo-file-system";
 const { width, height } = Dimensions.get("window");
 import { firebase } from "../../firebaseConfig";
 import { set } from "firebase/database";
+import { useNavigation } from "@react-navigation/native";
 
 const CreatePostScreen = () => {
   const featureIcons = [
@@ -74,8 +76,10 @@ const CreatePostScreen = () => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [content, setContent] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const flatListRef = useRef(null);
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
   useEffect(() => {
     (async () => {
       const { status } =
@@ -85,10 +89,6 @@ const CreatePostScreen = () => {
       }
     })();
   }, []);
-
-  useEffect(() => {
-    console.log("content", content);
-  }, [content]);
 
   const OptionComponent = ({ title }) => {
     return (
@@ -268,10 +268,9 @@ const CreatePostScreen = () => {
     setUploading(true);
     try {
       // Duyệt qua từng ảnh trong mảng selectedImages
-      const downloadURLs = await Promise.all(
+      const media = await Promise.all(
         selectedImages.map(async (image) => {
           const { uri } = await FileSystem.getInfoAsync(image.uri);
-          console.log("URI in upload media", uri);
           const blob = await new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
             xhr.onload = () => {
@@ -290,7 +289,7 @@ const CreatePostScreen = () => {
           const snapshot = await ref.put(blob);
 
           // Lấy đường dẫn tải xuống (download URL) của ảnh sau khi tải lên thành công
-          return await snapshot.ref.getDownloadURL();
+          return { type: image.type, URL: await snapshot.ref.getDownloadURL() };
         })
       );
 
@@ -298,7 +297,7 @@ const CreatePostScreen = () => {
       Alert.alert("Success", "Files uploaded");
 
       // Trả về một mảng chứa đường dẫn tải xuống của tất cả các ảnh
-      return downloadURLs;
+      return media;
     } catch (error) {
       console.log("Error uploading media", error);
       setUploading(false);
@@ -308,10 +307,8 @@ const CreatePostScreen = () => {
   };
 
   const handlePost = async () => {
-    const URLs = await uploadMedia();
-    const media = URLs.map((url) => {
-      return { URL: url };
-    });
+    console.log("posting");
+    const media = await uploadMedia();
 
     console.log("Media", media);
     const response = await PostSerVice.addAPost(content, media, access_token);
@@ -336,7 +333,12 @@ const CreatePostScreen = () => {
             paddingHorizontal: 12,
           }}
         >
-          <TouchableOpacity style={{ flex: 1 }}>
+          <TouchableOpacity
+            style={{ flex: 1 }}
+            onPress={() => {
+              navigation.goBack();
+            }}
+          >
             <Ionicons name="close" style={{ fontSize: 24, color: "black" }} />
           </TouchableOpacity>
 
@@ -355,12 +357,12 @@ const CreatePostScreen = () => {
             style={{
               flex: 1,
               display: "flex",
-              opacity: selectedImages.length || content.length ? 1 : 0.5,
+              opacity: selectedImages.length && content.length ? 1 : 0.5,
               justifyContent: "center",
               alignItems: "center",
             }}
             activeOpacity={1} // Ngăn chặn màu opacity khi TouchableOpacity được nhấn
-            disabled={selectedImages.length === 0}
+            disabled={selectedImages.length === 0 || content === ""}
             onPress={handlePost}
           >
             <LinearGradient
@@ -426,7 +428,31 @@ const CreatePostScreen = () => {
                 ]}
                 key={index}
               >
-                <Image source={{ uri: item.uri }} style={styles.image} />
+                {item.type === "image" ? (
+                  <Image source={{ uri: item.uri }} style={styles.image} />
+                ) : (
+                  <TouchableOpacity
+                    activeOpacity={1}
+                    onPress={() => {
+                      setIsPaused(!isPaused);
+                    }}
+                    style={{
+                      width: "100%",
+                      height: 300,
+                    }}
+                  >
+                    <Video
+                      source={{ uri: item.uri }}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                      }}
+                      resizeMode="contain"
+                      isLooping
+                      shouldPlay={!isPaused}
+                    />
+                  </TouchableOpacity>
+                )}
               </View>
             )}
             horizontal

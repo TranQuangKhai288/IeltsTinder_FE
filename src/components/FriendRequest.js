@@ -1,13 +1,5 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  StyleSheet,
-} from "react-native";
+import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import React, { useState } from "react";
-import * as UserService from "../apis/UserService";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { useSelector } from "react-redux";
 

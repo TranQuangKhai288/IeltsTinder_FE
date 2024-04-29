@@ -25,6 +25,7 @@
     "dotenv": "^16.4.5",
     "expo": "~49.0.13",
     "expo-av": "~13.4.1",
+    "expo-device": "^5.9.4",
     "expo-file-system": "~15.4.5",
     "expo-font": "~11.4.0",
     "expo-image-manipulator": "~11.3.0",
