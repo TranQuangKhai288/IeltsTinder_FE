@@ -5,7 +5,6 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import Entypo from "react-native-vector-icons/Entypo";
 import * as UserServices from "../apis/UserService";
 import BottomTabView from "../components/BottomTabView";
 import { useSelector } from "react-redux";

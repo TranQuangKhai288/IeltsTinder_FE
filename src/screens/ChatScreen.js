@@ -9,7 +9,7 @@ import {
 import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Matches from "../components/matches";
-import { MagnifyingGlassIcon } from "react-native-heroicons/outline";
+import { Ionicons } from "@expo/vector-icons";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { useNavigation } from "@react-navigation/native";
 import { useSelector } from "react-redux";
@@ -65,10 +65,7 @@ const ChatScreen = () => {
           }}
           className="flex-1 text-base mb-1 pl-1 tracking-widest"
         />
-
-        <View className="">
-          <MagnifyingGlassIcon size={hp(2.5)} color={"gray"} strokeWidth={3} />
-        </View>
+        <Ionicons name="search" style={{ fontSize: 32, color: "black" }} />
       </View>
 
       {/* Chat List */}

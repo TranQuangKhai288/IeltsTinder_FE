@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
+import { Alert } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 import BottomTab from "./BottomTab";
 import LoginScreen from "../screens/LoginScreen";
@@ -17,24 +18,29 @@ import {
   setupSocket,
 } from "../socketIO/SocketService";
 import { useSelector } from "react-redux";
+import { getSocket } from "../socketIO/SocketService";
 
 const Stack = () => {
   const user = useSelector((state) => state.user);
-
+  console.log("user", user?.userData?._id);
+  const socket = getSocket();
+  const prevUserIdRef = useRef();
   useEffect(() => {
-    if (user?.userData?._id) {
+    if (user?.userData?._id && user?.userData?._id !== prevUserIdRef.current) {
       console.log("connect socket");
       connectSocket();
       setupSocket(user.userData);
+      prevUserIdRef.current = user?.userData?._id;
     }
   }, [user]);
+
   return (
     <stack.Navigator
       screenOptions={{
         headerShown: false,
       }}
-      initialRouteName="BottomTab"
-      //initialRouteName={user?.userData?._id ? "BottomTab" : "WelcomeScreen"}
+      //initialRouteName="BottomTab"
+      initialRouteName={user?.userData?._id ? "BottomTab" : "WelcomeScreen"}
     >
       <stack.Screen name="BottomTab" component={BottomTab} />
       <stack.Screen name="LoginScreen" component={LoginScreen} />

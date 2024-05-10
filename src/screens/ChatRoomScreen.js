@@ -10,6 +10,7 @@ import {
   Platform,
   KeyboardAvoidingView,
   ScrollView,
+  Alert,
 } from "react-native";
 import {
   ChevronLeftIcon,
@@ -171,11 +172,31 @@ const ChatRoomScreen = ({ route }) => {
   }, [message]);
 
   const handleVideoCall = () => {
-    navigation.navigate("VideoCallScreen", {
-      avatar,
-      name,
-    });
+    const callerId = user.userData._id;
+    socket.emit("video-call", { chatRoomId, callerId });
+    console.log("video call");
   };
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("newCall", (data) => {
+        Alert.alert("Incoming call", "Do you want to accept the call?", [
+          {
+            text: "Accept",
+            onPress: () => {
+              console.log("accept call");
+            },
+          },
+          {
+            text: "Decline",
+            onPress: () => {
+              console.log("deny call");
+            },
+          },
+        ]);
+      });
+    }
+  }, [socket]);
 
   return (
     <SafeAreaView
