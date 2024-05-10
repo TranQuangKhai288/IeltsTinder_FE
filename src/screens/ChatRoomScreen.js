@@ -26,6 +26,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
 import * as MessageService from "../apis/MessageService";
 import { getSocket, joinRoom } from "../socketIO/SocketService";
+import { mediaDevices } from "react-native-webrtc";
 const android = Platform.OS === "android";
 const ios = Platform.OS === "ios";
 
@@ -36,7 +37,7 @@ const ChatRoomScreen = ({ route }) => {
   const [messagesData, setMessagesData] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const [typing, setTyping] = useState(false);
-
+  const callerId = user.userData._id;
   const navigation = useNavigation();
   const socket = getSocket();
   const checkIsSender = (item) => {
@@ -172,19 +173,43 @@ const ChatRoomScreen = ({ route }) => {
   }, [message]);
 
   const handleVideoCall = () => {
-    const callerId = user.userData._id;
     socket.emit("video-call", { chatRoomId, callerId });
     console.log("video call");
+    navigation.navigate("VideoCallScreen");
+  };
+
+  //getUserMedia
+
+  const initializeCamera = async () => {
+    try {
+      const stream = await mediaDevices.getUserMedia({ video: true });
+      return stream;
+    } catch (error) {
+      console.error("Error accessing camera:", error);
+    }
+  };
+
+  let callerStream = async () => {
+    const stream = await initializeCamera();
+    return stream;
   };
 
   useEffect(() => {
     if (socket) {
       socket.on("newCall", (data) => {
+        console.log("new call");
+        callerStream();
         Alert.alert("Incoming call", "Do you want to accept the call?", [
           {
             text: "Accept",
             onPress: () => {
-              console.log("accept call");
+              if (callerStream) {
+                socket.emit("accept-call", {
+                  chatRoomId,
+                  callerId,
+                  callerStream,
+                });
+              }
             },
           },
           {
