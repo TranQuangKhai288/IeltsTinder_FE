@@ -80,6 +80,7 @@ const ChatRoomScreen = ({ route }) => {
     setMessagesData(response.data);
     joinRoom(chatRoomId);
   };
+
   useEffect(() => {
     fetchMessages();
   }, []);
@@ -103,6 +104,7 @@ const ChatRoomScreen = ({ route }) => {
       };
     }
   }, [socket]);
+
   const handleSentMessage = async () => {
     if (message !== "") {
       const response = await MessageService.sendMessage(
@@ -123,17 +125,13 @@ const ChatRoomScreen = ({ route }) => {
     }
   }, [isTyping]);
 
-  //handle typing
-
   useEffect(() => {
     if (socket) {
       socket.on("typing", () => {
-        console.log("received typing");
         setIsTyping(true);
       });
 
       socket.on("stop-typing", () => {
-        console.log("received stop typing");
         setIsTyping(false);
       });
     }
@@ -146,7 +144,6 @@ const ChatRoomScreen = ({ route }) => {
   }, []);
 
   useEffect(() => {
-    console.log("isTyping", isTyping);
     if (isTyping) {
       setMessagesData((prev) => [...prev, virtualMessage]);
     } else {
@@ -159,14 +156,11 @@ const ChatRoomScreen = ({ route }) => {
   };
 
   useEffect(() => {
-    console.log("messaage", message);
     if (message !== "" && !typing) {
-      console.log("typing");
       socket.emit("typing", chatRoomId);
       setTyping(true);
     }
     if (message === "" && typing) {
-      console.log("stop typing");
       socket.emit("stop-typing", chatRoomId);
       setTyping(false);
     }
@@ -174,42 +168,25 @@ const ChatRoomScreen = ({ route }) => {
 
   const handleVideoCall = () => {
     socket.emit("video-call", { chatRoomId, callerId });
-    console.log("video call");
-    navigation.navigate("VideoCallScreen");
-  };
-
-  //getUserMedia
-
-  const initializeCamera = async () => {
-    try {
-      const stream = await mediaDevices.getUserMedia({ video: true });
-      return stream;
-    } catch (error) {
-      console.error("Error accessing camera:", error);
-    }
-  };
-
-  let callerStream = async () => {
-    const stream = await initializeCamera();
-    return stream;
+    navigation.navigate("VideoCallScreen", {
+      callRoomId: `${callerId}-${chatRoomId}`,
+    });
   };
 
   useEffect(() => {
     if (socket) {
-      socket.on("newCall", (data) => {
-        console.log("new call");
-        callerStream();
+      socket.on("incoming-call", async (data) => {
+        const { callerId, callRoomId } = data;
+
         Alert.alert("Incoming call", "Do you want to accept the call?", [
           {
             text: "Accept",
             onPress: () => {
-              if (callerStream) {
-                socket.emit("accept-call", {
-                  chatRoomId,
-                  callerId,
-                  callerStream,
-                });
-              }
+              socket.emit("accept-call", {
+                callRoomId,
+                callerId,
+              });
+              navigation.navigate("VideoCallScreen", { callRoomId });
             },
           },
           {

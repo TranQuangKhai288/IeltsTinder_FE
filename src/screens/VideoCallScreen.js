@@ -1,75 +1,94 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, ActivityIndicator } from "react-native";
-import { mediaDevices, RTCView } from "react-native-webrtc";
-import { getSocket, joinRoom } from "../socketIO/SocketService";
+import React, { useEffect, useState } from "react";
+import { View, Text } from "react-native";
+import { getSocket } from "../socketIO/SocketService";
+import { RTCPeerConnection, RTCView, mediaDevices } from "react-native-webrtc";
 
-const VideoCallScreen = () => {
-  const [callerStream, setCallerStream] = useState(null); // State để lưu trữ luồng media từ camera của caller
-  const [isCallAccepted, setIsCallAccepted] = useState(false); // State để theo dõi xem cuộc gọi đã được chấp nhận chưa
+const VideoCallScreen = ({ route }) => {
+  const { callRoomId } = route.params;
   const socket = getSocket();
+  const [localStream, setLocalStream] = useState(null);
+  const [remoteStreams, setRemoteStreams] = useState([]);
 
-  // Hàm xử lý khi người kia accept cuộc gọi
-  const handleAcceptedCall = (data) => {
-    console.log("Accepted call:", data);
+  const getLocalStream = async () => {
+    const stream = await mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    });
+    setLocalStream(stream);
   };
 
-  // Effect hook để tạo luồng media từ camera của caller khi component được render
   useEffect(() => {
-    const initializeCamera = async () => {
-      try {
-        const stream = await mediaDevices.getUserMedia({ video: true });
-        setCallerStream(stream);
-      } catch (error) {
-        console.error("Error accessing camera:", error);
-      }
-    };
-    initializeCamera();
-  }, []);
-
-  // Effect hook để lắng nghe sự kiện "accepted-call" từ server
-  useEffect(() => {
-    socket.on("accepted-call", handleAcceptedCall);
+    getLocalStream();
 
     return () => {
-      socket.off("accepted-call", handleAcceptedCall);
+      if (localStream) {
+        localStream.getTracks().forEach((track) => {
+          track.stop();
+        });
+      }
     };
   }, []);
 
+  useEffect(() => {
+    if (socket) {
+      socket.on("accepted", () => {
+        console.log("accepted call");
+        startCall();
+      });
+    }
+
+    return () => {
+      if (socket) {
+        socket.off("accepted");
+      }
+    };
+  }, [socket]);
+
+  const startCall = async () => {
+    try {
+      // Yêu cầu quyền truy cập camer
+
+      // Khởi tạo RTCPeerConnection để gửi và nhận dữ liệu media
+      const peerConnection = new RTCPeerConnection();
+
+      // Thêm luồng media vào RTCPeerConnection
+      stream.getTracks().forEach((track) => {
+        peerConnection.addTrack(track, stream);
+      });
+
+      // Xử lý khi có luồng media từ người khác
+      peerConnection.ontrack = (event) => {
+        setRemoteStreams((prevStreams) => [...prevStreams, event.streams[0]]);
+      };
+
+      // Các xử lý khác cho RTCPeerConnection, như trao đổi ICE Candidate, tạo offer/answer...
+    } catch (error) {
+      console.error("Error starting call:", error);
+    }
+  };
+
+  console.log("localStream:", localStream);
+  console.log("remoteStreams:", remoteStreams);
+
   return (
-    <View style={{ flex: 1 }}>
-      {/* Phần hiển thị camera của caller */}
-      <View style={{ flex: 1 }}>
-        {/* RTCView để hiển thị video từ cuộc gọi */}
-        {callerStream && (
-          <RTCView streamURL={callerStream.toURL()} style={{ flex: 1 }} />
-        )}
-      </View>
+    <View>
+      <Text>Video Call Screen</Text>
+      {/* Hiển thị camera cục bộ */}
+      {localStream && (
+        <RTCView
+          streamURL={localStream.toURL()}
+          style={{ width: 200, height: 200 }}
+        />
+      )}
 
-      {/* Phần hiển thị biểu tượng loading hoặc camera của người kia */}
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        {/* Nếu cuộc gọi đã được chấp nhận, hiển thị camera của người kia */}
-        {isCallAccepted ? (
-          <RTCView style={{ flex: 1 }} />
-        ) : (
-          <View>
-            <Text>Đang chờ người kia chấp nhận cuộc gọi...</Text>
-          </View>
-        )}
-      </View>
-
-      {/* Phần tiêu đề */}
-      <View
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          padding: 16,
-          backgroundColor: "rgba(0,0,0,0.5)",
-        }}
-      >
-        <Text style={{ color: "white", fontSize: 18 }}>Cuộc gọi video</Text>
-      </View>
+      {/* Hiển thị camera từ người khác */}
+      {remoteStreams.map((stream, index) => (
+        <RTCView
+          key={index}
+          streamURL={stream.toURL()}
+          style={{ width: 200, height: 200 }}
+        />
+      ))}
     </View>
   );
 };

@@ -1,7 +1,7 @@
 // SocketService.js
 
 import io from "socket.io-client";
-const ENDPOINT = process.env.URL_API || "http://172.16.0.54:5000";
+const ENDPOINT = process.env.URL_API || "http://192.168.1.11:5000";
 
 let socket;
 export const connectSocket = () => {
