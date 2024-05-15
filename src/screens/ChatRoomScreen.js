@@ -167,9 +167,11 @@ const ChatRoomScreen = ({ route }) => {
   }, [message]);
 
   const handleVideoCall = () => {
-    socket.emit("video-call", { chatRoomId, callerId });
     navigation.navigate("VideoCallScreen", {
+      chatRoomId: chatRoomId,
+      callerId: callerId,
       callRoomId: `${callerId}-${chatRoomId}`,
+      isCaller: true,
     });
   };
 
@@ -186,7 +188,10 @@ const ChatRoomScreen = ({ route }) => {
                 callRoomId,
                 callerId,
               });
-              navigation.navigate("VideoCallScreen", { callRoomId });
+              navigation.navigate("VideoCallScreen", {
+                callRoomId,
+                isCaller: false,
+              });
             },
           },
           {
