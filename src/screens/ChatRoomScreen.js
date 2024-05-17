@@ -113,6 +113,8 @@ const ChatRoomScreen = ({ route }) => {
         user.access_token
       );
       if (response.status === "OK") {
+        console.log(response.data, "response");
+        setMessagesData((prev) => [...prev, response.data]);
         setMessage("");
         socket.emit("new-message", response.data);
       }
@@ -174,36 +176,6 @@ const ChatRoomScreen = ({ route }) => {
       isCaller: true,
     });
   };
-
-  useEffect(() => {
-    if (socket) {
-      socket.on("incoming-call", async (data) => {
-        const { callerId, callRoomId } = data;
-
-        Alert.alert("Incoming call", "Do you want to accept the call?", [
-          {
-            text: "Accept",
-            onPress: () => {
-              socket.emit("accept-call", {
-                callRoomId,
-                callerId,
-              });
-              navigation.navigate("VideoCallScreen", {
-                callRoomId,
-                isCaller: false,
-              });
-            },
-          },
-          {
-            text: "Decline",
-            onPress: () => {
-              console.log("deny call");
-            },
-          },
-        ]);
-      });
-    }
-  }, [socket]);
 
   return (
     <SafeAreaView

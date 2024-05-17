@@ -11,6 +11,7 @@ import ReviewPractice from "../screens/ReviewPractice";
 import PracticeScreen from "../screens/PracticeScreen";
 import EditProfile from "../screens/EditProfile";
 import CreatePostScreen from "../screens/CreateAPostScreen";
+
 const stack = createStackNavigator();
 import {
   connectSocket,
@@ -23,8 +24,8 @@ import { getSocket } from "../socketIO/SocketService";
 const Stack = () => {
   const user = useSelector((state) => state.user);
   console.log("user", user?.userData?._id);
-  const socket = getSocket();
   const prevUserIdRef = useRef();
+
   useEffect(() => {
     if (user?.userData?._id && user?.userData?._id !== prevUserIdRef.current) {
       console.log("connect socket");
