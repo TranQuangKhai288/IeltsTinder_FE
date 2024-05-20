@@ -6,6 +6,9 @@ import FriendsScreen from "../screens/FriendsScreen";
 import MenuScreen from "../screens/MenuScreen";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
+import { Alert } from "react-native";
+import { getSocket } from "../socketIO/SocketService";
+import { useNavigation } from "@react-navigation/native";
 const Tab = createBottomTabNavigator();
 
 const TabArr = [
@@ -51,6 +54,40 @@ const TabArr = [
 ];
 
 const BottomTab = () => {
+  const navigation = useNavigation();
+  const socket = getSocket();
+  useEffect(() => {
+    if (socket) {
+      socket.on("incoming-call", async (data) => {
+        const { callerId, callRoomId } = data;
+
+        Alert.alert("Incoming call", "Do you want to accept the call?", [
+          {
+            text: "Accept",
+            onPress: () => {
+              navigation.navigate("VideoCallScreen", {
+                callRoomId,
+                isCaller: false,
+              });
+              socket.emit("accept-call", {
+                callRoomId,
+                callerId,
+              });
+            },
+          },
+          {
+            text: "Decline",
+            onPress: () => {
+              socket.emit("reject-call", {
+                callRoomId,
+                callerId,
+              });
+            },
+          },
+        ]);
+      });
+    }
+  }, [socket]);
   return (
     <Tab.Navigator
       screenOptions={{

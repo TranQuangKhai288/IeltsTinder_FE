@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import Feather from "react-native-vector-icons/Feather";
 import { useNavigation } from "@react-navigation/native";
+import { useSelector } from "react-redux";
+import * as ChatService from "../apis/ChatService";
 export const ProfileBody = ({
   name,
   accountName,
@@ -111,11 +113,42 @@ export const ProfileBody = ({
 };
 
 export const ProfileButtons = ({ id, name, accountName, profileImage }) => {
+  const access_token = useSelector((state) => state.user.access_token);
   const navigation = useNavigation();
   const [follow, setFollow] = useState(follow);
+  const user = useSelector((state) => state.user.userData);
+  const check = id === user._id ? 0 : 1;
+
+  const handleChatRoom = async () => {
+    const response = await ChatService.accessChat(id, access_token);
+
+    if (response?.status === "OK") {
+      const checkNameofChat = (item) => {
+        if (item.users[0].name === user.name) {
+          return item.users[1].name;
+        } else {
+          return item.users[0].name;
+        }
+      };
+
+      const checkAvatarofChat = (item) => {
+        if (item.users[0].name === user.name) {
+          return item.users[1].avatar;
+        } else {
+          return item.users[0].avatar;
+        }
+      };
+      navigation.navigate("ChatRoomScreen", {
+        chatRoomId: response.data._id,
+        name: checkNameofChat(response.data),
+        avatar: checkAvatarofChat(response.data),
+      });
+    }
+  };
+
   return (
     <>
-      {id === 0 ? (
+      {check === 0 ? (
         <View
           style={{
             width: "100%",
@@ -162,6 +195,7 @@ export const ProfileButtons = ({ id, name, accountName, profileImage }) => {
           </TouchableOpacity>
         </View>
       ) : (
+        //if profile is not of the this user
         <View
           style={{
             width: "100%",
@@ -191,7 +225,8 @@ export const ProfileButtons = ({ id, name, accountName, profileImage }) => {
               </Text>
             </View>
           </TouchableOpacity>
-          <View
+          <TouchableOpacity
+            onPress={() => handleChatRoom()}
             style={{
               width: "42%",
               height: 35,
@@ -203,7 +238,7 @@ export const ProfileButtons = ({ id, name, accountName, profileImage }) => {
             }}
           >
             <Text>Message</Text>
-          </View>
+          </TouchableOpacity>
           <View
             style={{
               width: "10%",

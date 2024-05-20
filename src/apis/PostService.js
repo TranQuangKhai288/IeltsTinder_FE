@@ -5,6 +5,11 @@ export const getAll = async () => {
   return res;
 };
 
+export const getPostOfAUser = async (userId) => {
+  const res = await baseURL.get(`/post/${userId}`);
+  return res;
+};
+
 export const addAPost = async (content, media, access_token) => {
   const res = await baseURL.post(
     `/post/`,

@@ -1,96 +1,287 @@
-import React, { useEffect, useState } from "react";
-import { View, Text } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { getSocket } from "../socketIO/SocketService";
-import { RTCPeerConnection, RTCView, mediaDevices } from "react-native-webrtc";
+import { useSelector } from "react-redux";
+import {
+  RTCPeerConnection,
+  RTCView,
+  mediaDevices,
+  RTCSessionDescription,
+  RTCIceCandidate,
+} from "react-native-webrtc";
+import { useNavigation } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 
 const VideoCallScreen = ({ route }) => {
-  const { callRoomId } = route.params;
+  const { callRoomId, chatRoomId, isCaller, callerId } = route.params;
   const socket = getSocket();
   const [localStream, setLocalStream] = useState(null);
-  const [remoteStreams, setRemoteStreams] = useState([]);
+  const [remoteStream, setRemoteStream] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const user = useSelector((state) => state.user.userData);
+  const navigation = useNavigation();
+  const peerConnection = useRef(null);
 
   const getLocalStream = async () => {
-    const stream = await mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
-    setLocalStream(stream);
+    try {
+      const stream = await mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+      setLocalStream(stream);
+    } catch (error) {
+      console.log("Error getting local stream:", error);
+    }
   };
 
   useEffect(() => {
     getLocalStream();
-
-    return () => {
-      if (localStream) {
-        localStream.getTracks().forEach((track) => {
-          track.stop();
-        });
-      }
-    };
   }, []);
 
   useEffect(() => {
     if (socket) {
-      socket.on("accepted", () => {
-        console.log("accepted call");
-        startCall();
+      if (isCaller) {
+        socket.emit("new-call", { chatRoomId, callerId });
+      }
+
+      socket.on("accepted", async () => {
+        console.log("Call accepted");
+        setIsConnected(true);
+        if (localStream) {
+          await createPeerConnection();
+        } else {
+          console.log("Local stream not ready yet");
+        }
+      });
+
+      socket.on("rejected", async () => {
+        console.log("Call rejected");
+        setIsConnected(false);
+        navigation.navigate("BottomTab");
+      });
+
+      socket.on("rtc-message", async (rtcMessage) => {
+        console.log("Received RTC message:", rtcMessage);
+        await handleRtcMessage(rtcMessage);
       });
     }
 
     return () => {
       if (socket) {
         socket.off("accepted");
+        socket.off("rtc-message");
       }
     };
-  }, [socket]);
+  }, [socket, isCaller, callRoomId, callerId, localStream]);
 
-  const startCall = async () => {
-    try {
-      // Yêu cầu quyền truy cập camer
+  const createPeerConnection = async () => {
+    const pc = new RTCPeerConnection();
+    peerConnection.current = pc;
 
-      // Khởi tạo RTCPeerConnection để gửi và nhận dữ liệu media
-      const peerConnection = new RTCPeerConnection();
+    pc.onicecandidate = (event) => {
+      if (event.candidate) {
+        console.log("ICE Candidate:", event.candidate);
+        socket.emit("rtc-message", {
+          type: "candidate",
+          candidate: event.candidate,
+          callRoomId: callRoomId,
+        });
+      }
+    };
 
-      // Thêm luồng media vào RTCPeerConnection
-      stream.getTracks().forEach((track) => {
-        peerConnection.addTrack(track, stream);
+    pc.ontrack = (event) => {
+      console.log("Remote stream added:", event.streams);
+      if (event.streams && event.streams[0]) {
+        setRemoteStream(event.streams[0]);
+      }
+    };
+
+    if (localStream) {
+      localStream.getTracks().forEach((track) => {
+        pc.addTrack(track, localStream);
       });
+    } else {
+      console.log(
+        "Local stream is not available when creating peer connection"
+      );
+    }
 
-      // Xử lý khi có luồng media từ người khác
-      peerConnection.ontrack = (event) => {
-        setRemoteStreams((prevStreams) => [...prevStreams, event.streams[0]]);
-      };
+    if (isCaller) {
+      try {
+        if (pc.signalingState === "stable") {
+          const offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+          console.log("Offer created and set as local description");
 
-      // Các xử lý khác cho RTCPeerConnection, như trao đổi ICE Candidate, tạo offer/answer...
-    } catch (error) {
-      console.error("Error starting call:", error);
+          socket.emit("rtc-message", {
+            type: "offer",
+            sdp: pc.localDescription,
+            callRoomId: callRoomId,
+          });
+        } else {
+          console.log(
+            "Peer connection is not in a stable state to create offer"
+          );
+        }
+      } catch (error) {
+        console.log("Error creating offer:", error);
+      }
     }
   };
 
-  console.log("localStream:", localStream);
-  console.log("remoteStreams:", remoteStreams);
+  const handleRtcMessage = async (rtcMessage) => {
+    let pc = peerConnection.current;
+    if (!pc) {
+      pc = new RTCPeerConnection();
+      peerConnection.current = pc;
+
+      pc.onicecandidate = (event) => {
+        if (event.candidate) {
+          console.log("ICE Candidate:", event.candidate);
+          socket.emit("rtc-message", {
+            type: "candidate",
+            candidate: event.candidate,
+            callRoomId: callRoomId,
+          });
+        }
+      };
+
+      pc.ontrack = (event) => {
+        console.log("Remote stream added:", event.streams);
+        if (event.streams && event.streams[0]) {
+          setRemoteStream(event.streams[0]);
+        }
+      };
+
+      if (localStream) {
+        localStream.getTracks().forEach((track) => {
+          pc.addTrack(track, localStream);
+        });
+      } else {
+        console.log(
+          "Local stream is not available when creating peer connection"
+        );
+      }
+    }
+
+    try {
+      if (rtcMessage.type === "offer" || rtcMessage.type === "answer") {
+        if (rtcMessage.sdp) {
+          if (
+            (rtcMessage.type === "offer" && pc.signalingState === "stable") ||
+            (rtcMessage.type === "answer" &&
+              pc.signalingState === "have-local-offer")
+          ) {
+            try {
+              await pc.setRemoteDescription(
+                new RTCSessionDescription(rtcMessage.sdp)
+              );
+              console.log(`Remote ${rtcMessage.type} set`);
+            } catch (error) {
+              console.log(`Error setting remote ${rtcMessage.type}:`, error);
+            }
+          } else {
+            console.log(
+              `Peer connection is not in the correct state to set remote ${rtcMessage.type}`
+            );
+          }
+        } else {
+          console.log(`Received ${rtcMessage.type} without SDP data`);
+        }
+
+        if (rtcMessage.type === "offer") {
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+          console.log("Answer created and set as local description");
+
+          socket.emit("rtc-message", {
+            type: "answer",
+            sdp: pc.localDescription,
+            callRoomId: callRoomId,
+          });
+        }
+      } else if (rtcMessage.type === "candidate") {
+        if (pc.remoteDescription) {
+          if (rtcMessage.candidate) {
+            console.log("rtcMessage candidate:", rtcMessage.candidate);
+            try {
+              await pc.addIceCandidate(
+                new RTCIceCandidate(rtcMessage.candidate)
+              );
+              console.log("ICE Candidate added");
+            } catch (error) {
+              console.log("Error adding ICE candidate:", error);
+            }
+          } else {
+            console.log("Received candidate message without candidate data");
+          }
+        } else {
+          console.log("Remote description not set before adding ICE candidate");
+        }
+      }
+    } catch (error) {
+      console.log("Error handling RTC message:", error);
+    }
+  };
+
+  const handleEndCall = () => {
+    if (socket) {
+      socket.emit("end-call", { callRoomId });
+      setIsConnected(false);
+      navigation.navigate("BottomTab");
+    }
+  };
 
   return (
-    <View>
-      <Text>Video Call Screen</Text>
-      {/* Hiển thị camera cục bộ */}
+    <View style={styles.container}>
       {localStream && (
-        <RTCView
-          streamURL={localStream.toURL()}
-          style={{ width: 200, height: 200 }}
-        />
+        <RTCView streamURL={localStream.toURL()} style={styles.localVideo} />
+      )}
+      {isConnected || remoteStream ? (
+        <RTCView streamURL={localStream.toURL()} style={styles.remoteVideo} />
+      ) : (
+        <Text>No remote streams</Text>
       )}
 
-      {/* Hiển thị camera từ người khác */}
-      {remoteStreams.map((stream, index) => (
-        <RTCView
-          key={index}
-          streamURL={stream.toURL()}
-          style={{ width: 200, height: 200 }}
-        />
-      ))}
+      <TouchableOpacity
+        style={styles.Button}
+        onPress={() => {
+          handleEndCall();
+        }}
+      >
+        <Ionicons name="call" size={30} color="white" />
+      </TouchableOpacity>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  localVideo: {
+    position: "relative",
+    width: "100%",
+    flex: 1,
+  },
+  remoteVideo: {
+    position: "relative",
+    width: "100%",
+    flex: 1,
+  },
+  Button: {
+    position: "absolute",
+    bottom: 10,
+
+    backgroundColor: "red",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    padding: 20,
+
+    borderRadius: 50,
+  },
+});
 
 export default VideoCallScreen;

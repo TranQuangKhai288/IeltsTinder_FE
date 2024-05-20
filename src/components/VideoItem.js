@@ -22,6 +22,7 @@ import BottomSheet from "@gorhom/bottom-sheet";
 import * as PostService from "../apis/PostService";
 import { ScrollView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
 
 const android = Platform.OS === "android";
 const windowWidth = Dimensions.get("window").width;
@@ -54,6 +55,13 @@ const VideoItem = ({ data, isActive }) => {
     if (res.status === "OK") {
       setComments(res.data);
     }
+  };
+
+  const navigation = useNavigation();
+
+  const handleOtherProfile = (data) => {
+    const id = data.user._id;
+    navigation.navigate("OtherProfileScreen", { id });
   };
 
   const renderComment = () => {
@@ -226,7 +234,12 @@ const VideoItem = ({ data, isActive }) => {
         }}
       >
         <View>
-          <TouchableOpacity activeOpacity={1}>
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => {
+              handleOtherProfile(data);
+            }}
+          >
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <View
                 style={{
