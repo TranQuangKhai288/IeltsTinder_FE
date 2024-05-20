@@ -11,6 +11,7 @@ import ReviewPractice from "../screens/ReviewPractice";
 import PracticeScreen from "../screens/PracticeScreen";
 import EditProfile from "../screens/EditProfile";
 import CreatePostScreen from "../screens/CreateAPostScreen";
+import ProfileScreen from "../screens/ProfileScreen";
 
 const stack = createStackNavigator();
 import {
@@ -53,6 +54,7 @@ const Stack = () => {
       <stack.Screen name="PracticeScreen" component={PracticeScreen} />
       <stack.Screen name="EditProfile" component={EditProfile} />
       <stack.Screen name="CreatePostScreen" component={CreatePostScreen} />
+      <stack.Screen name="OtherProfileScreen" component={ProfileScreen} />
     </stack.Navigator>
   );
 };

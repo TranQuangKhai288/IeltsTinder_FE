@@ -1,34 +1,29 @@
-import React from "react";
-import { View, Text, ScrollView, Dimensions } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, ScrollView, Dimensions, Image, Text } from "react-native";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import Ionic from "react-native-vector-icons/Ionicons";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import * as PostServices from "../apis/PostService";
+import { Video } from "expo-av";
 
-const BottomTabView = () => {
+const BottomTabView = ({ userId }) => {
   const Tab = createMaterialTopTabNavigator();
 
-  const bottomHeight = useBottomTabBarHeight();
-  const Height = Dimensions.get("window").height / 3 - bottomHeight;
+  const Height = Dimensions.get("window").height / 3;
   const Width = Dimensions.get("window").width / 3.3;
-  let squares = [];
-  let numberOfSquare = 4;
 
-  for (let index = 0; index < numberOfSquare; index++) {
-    squares.push(
-      <View key={index}>
-        <View
-          style={{
-            width: Width,
-            height: 150,
-            marginVertical: 0.5,
-            backgroundColor: "black",
-            margin: 4,
-            opacity: 0.1,
-          }}
-        ></View>
-      </View>
-    );
-  }
+  const [posts, setPosts] = useState([]);
+
+  const fetchPostsOfUser = async () => {
+    const response = await PostServices.getPostOfAUser(userId);
+    if (response.status === "OK") {
+      console.log(response.data);
+      setPosts(response.data);
+    }
+  };
+
+  useEffect(() => {
+    fetchPostsOfUser();
+  }, [userId]);
 
   const Posts = () => {
     return (
@@ -42,7 +37,6 @@ const BottomTabView = () => {
         <View
           style={{
             width: "100%",
-            height: "100%",
             minHeight: Height,
             backgroundColor: "white",
             flexWrap: "wrap",
@@ -53,66 +47,66 @@ const BottomTabView = () => {
             paddingLeft: 5,
           }}
         >
-          {squares}
+          {posts.length > 0 ? (
+            posts.map((post, index) => (
+              <View key={index}>
+                <View
+                  style={{
+                    width: Width,
+                    height: 160,
+                    marginVertical: 0.5,
+                    margin: 4,
+                  }}
+                >
+                  {post.media[0].type === "image" ? (
+                    <Image
+                      source={{ uri: post.media[0].URL }} // Sử dụng thumbnailURL để hiển thị hình ảnh
+                      style={{ width: "100%", height: "100%" }}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <Video
+                      source={{ uri: post.media[0].URL }} // Sử dụng thumbnailURL để hiển thị hình ảnh
+                      style={{ width: "100%", height: "100%" }}
+                      resizeMode="cover"
+                    />
+                  )}
+                </View>
+              </View>
+            ))
+          ) : (
+            <View
+              style={{
+                width: "100%",
+                height: "100%",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 20,
+                  color: "black",
+                  fontWeight: "bold",
+                }}
+              >
+                There is no post here
+              </Text>
+            </View>
+          )}
         </View>
       </ScrollView>
     );
   };
-  const Video = () => {
-    return (
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        style={{
-          width: "100%",
-          height: "100%",
-        }}
-      >
-        <View
-          style={{
-            width: "100%",
-            height: "100%",
-            minHeight: Height,
-            backgroundColor: "white",
-            flexWrap: "wrap",
-            flexDirection: "row",
-            paddingVertical: 4,
-            justifyContent: "flex-start",
-            paddingRight: 5,
-            paddingLeft: 5,
-          }}
-        >
-          {squares}
-        </View>
-      </ScrollView>
-    );
+
+  const VideoTab = () => {
+    // Similar implementation as Posts if needed
+    return <Posts />;
   };
+
   const Tags = () => {
-    return (
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        style={{
-          width: "100%",
-          height: "100%",
-        }}
-      >
-        <View
-          style={{
-            width: "100%",
-            height: "100%",
-            minHeight: Height,
-            backgroundColor: "white",
-            flexWrap: "wrap",
-            flexDirection: "row",
-            paddingVertical: 4,
-            justifyContent: "flex-start",
-            paddingRight: 5,
-            paddingLeft: 5,
-          }}
-        >
-          {squares}
-        </View>
-      </ScrollView>
-    );
+    // Similar implementation as Posts if needed
+    return <Posts />;
   };
 
   return (
@@ -123,25 +117,25 @@ const BottomTabView = () => {
           backgroundColor: "black",
           height: 1.5,
         },
-        tabBarIcon: ({ focused, colour }) => {
+        tabBarIcon: ({ focused, color }) => {
           let iconName;
           if (route.name === "Posts") {
             iconName = focused ? "ios-apps-sharp" : "ios-apps-sharp";
-            colour = focused ? "black" : "gray";
+            color = focused ? "black" : "gray";
           } else if (route.name === "Video") {
             iconName = focused ? "ios-play-circle" : "ios-play-circle-outline";
-            colour = focused ? "black" : "gray";
+            color = focused ? "black" : "gray";
           } else if (route.name === "Tags") {
             iconName = focused ? "ios-person" : "ios-person-outline";
-            colour = focused ? "black" : "gray";
+            color = focused ? "black" : "gray";
           }
 
-          return <Ionic name={iconName} color={colour} size={22} />;
+          return <Ionic name={iconName} color={color} size={22} />;
         },
       })}
     >
       <Tab.Screen name="Posts" component={Posts} />
-      <Tab.Screen name="Video" component={Video} />
+      <Tab.Screen name="Video" component={VideoTab} />
       <Tab.Screen name="Tags" component={Tags} />
     </Tab.Navigator>
   );

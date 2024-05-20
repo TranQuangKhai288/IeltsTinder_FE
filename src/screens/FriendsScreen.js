@@ -84,17 +84,21 @@ const FriendsScreen = () => {
         {/* end of header */}
 
         {/* Friend Request */}
-        {friendRequests?.map((request, index) => {
-          return (
-            <FriendRequest
-              key={index}
-              id={request.senderId._id}
-              name={request.senderId.name}
-              level={request.senderId.level}
-              avatar={request.senderId.avatar}
-            />
-          );
-        })}
+        {friendRequests.length > 0 ? (
+          friendRequests?.map((request, index) => {
+            return (
+              <FriendRequest
+                key={index}
+                id={request.senderId._id}
+                name={request.senderId.name}
+                level={request.senderId.level}
+                avatar={request.senderId.avatar}
+              />
+            );
+          })
+        ) : (
+          <Text className="text-white text-center">No friend requests</Text>
+        )}
         {/* end of Friend Request */}
       </ScrollView>
     </View>

@@ -9,8 +9,9 @@ import * as UserServices from "../apis/UserService";
 import BottomTabView from "../components/BottomTabView";
 import { useSelector } from "react-redux";
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ route }) => {
   const [circuls, setCirculs] = useState([]);
+  const [anotherUser, setAnotherUser] = useState();
   const user = useSelector((state) => state.user.userData);
   const access_token = useSelector((state) => state.user.access_token);
 
@@ -21,8 +22,19 @@ const ProfileScreen = () => {
     }
   };
 
+  const userId = route?.params?.id || user?._id;
+  const fetchAnotherUser = async () => {
+    const response = await UserServices.getDetailsUser(userId, access_token);
+    if (response.status === "OK") {
+      setAnotherUser(response.data);
+    }
+  };
+  useEffect(() => {
+    if (userId !== user?._id) fetchAnotherUser();
+  }, []);
+
   // console.log(
-  //   JSON.stringify(user, (key, value) => {
+  //   JSON.stringify(anotherUser, (key, value) => {
   //     if (key === "avatar") {
   //       return "avatar uri";
   //     }
@@ -32,9 +44,10 @@ const ProfileScreen = () => {
   useEffect(() => {
     const fetchFriendsData = async () => {
       // Map over each friend ID and fetch their details concurrently
-      const friendDetailsPromises = user.friends.map((friendId) =>
-        fetchFriendDetails(friendId)
-      );
+      const friendDetailsPromises =
+        userId !== user?._id
+          ? anotherUser.friends.map((friendId) => fetchFriendDetails(friendId))
+          : user.friends.map((friendId) => fetchFriendDetails(friendId));
       // Wait for all friend details to be fetched
       const friendDetails = await Promise.all(friendDetailsPromises);
       // Push friend details into circuls array
@@ -83,18 +96,24 @@ const ProfileScreen = () => {
     >
       <View style={{ width: "100%", padding: 10 }}>
         <ProfileBody
-          name={user?.name}
-          accountName={user?.name}
-          profileImage={user?.avatar}
-          friends={user?.friends?.length}
-          Level={user?.level}
-          post={user?.posts}
+          name={userId !== user?._id ? anotherUser?.name : user?.name}
+          accountName={userId !== user?._id ? anotherUser?.name : user?.name}
+          profileImage={
+            userId !== user?._id ? anotherUser?.avatar : user?.avatar
+          }
+          friends={
+            userId !== user?._id
+              ? anotherUser?.friends?.length
+              : user?.friends?.length
+          }
+          Level={userId !== user?._id ? anotherUser?.level : user?.level}
+          post={userId !== user?._id ? anotherUser?.posts : user?.posts}
         />
         <ProfileButtons
-          id={0}
+          id={userId}
           name={user?.name}
           accountName={user?.name}
-          profileImage={user?.avatar}
+          profileImage={user?.level}
         />
       </View>
       <View>
@@ -118,7 +137,7 @@ const ProfileScreen = () => {
           {circuls}
         </ScrollView>
       </View>
-      <BottomTabView />
+      <BottomTabView userId={userId} />
     </View>
   );
 };

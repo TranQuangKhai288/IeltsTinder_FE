@@ -312,7 +312,6 @@ const CreatePostScreen = () => {
 
     console.log("Media", media);
     const response = await PostSerVice.addAPost(content, media, access_token);
-    console.log("Response from addAPost", response);
   };
 
   return (
