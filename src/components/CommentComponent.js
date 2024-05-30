@@ -56,11 +56,7 @@ const CommentComponent = ({ name, content, avatar, createdAt }) => {
 
       <View style={styles.comment}>
         <Text style={styles.name}>{name}</Text>
-        <Text style={styles.content}>
-          fneaw nfgrjoa nfdjal rnv lgfd;nsavirea o;nvfdl;aniv roanv klkfdnfvira
-          nvm,xcn roeanggvornvmdf
-          {/* {content} */}
-        </Text>
+        <Text style={styles.content}>{content}</Text>
         <Text style={styles.time}>{timeString}</Text>
       </View>
     </View>

@@ -1,5 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -40,6 +40,7 @@ const ChatRoomScreen = ({ route }) => {
   const callerId = user.userData._id;
   const navigation = useNavigation();
   const socket = getSocket();
+  const flatListRef = useRef(null);
   const checkIsSender = (item) => {
     if (item.sender.name === user.userData.name) {
       return true;
@@ -177,16 +178,19 @@ const ChatRoomScreen = ({ route }) => {
     });
   };
 
+  const scrollToBottom = () => {
+    if (flatListRef.current) {
+      setTimeout(() => flatListRef.current.scrollToEnd({ animated: false }), 0);
+    }
+  };
+
   return (
     <SafeAreaView
-      className=" justify-center items-center relative bg-white"
-      style={{
-        paddingTop: hp(3),
-      }}
+      className="justify-center items-center relative bg-white"
+      style={{ paddingTop: hp(3) }}
     >
       {/* Header */}
-      <View className="justify-between items-center flex-row w-full px-4 pb-2 border-b border-neutral-400">
-        {/* Arrow */}
+      <View className="absolute top-0 justify-between items-center flex-row w-full px-4 pb-2 border-b border-neutral-400 h-16">
         <TouchableOpacity
           className="w-2/3 flex-row items-center"
           onPress={() => navigation.navigate("Chat")}
@@ -195,10 +199,7 @@ const ChatRoomScreen = ({ route }) => {
           <View className="border-2 rounded-full border-red-400 mr-2 ml-4">
             <Image
               source={{ uri: avatar }}
-              style={{
-                width: hp(4.5),
-                height: hp(4.5),
-              }}
+              style={{ width: hp(4.5), height: hp(4.5) }}
               className="rounded-full"
             />
           </View>
@@ -208,15 +209,7 @@ const ChatRoomScreen = ({ route }) => {
           </View>
         </TouchableOpacity>
 
-        {/* Name */}
-
-        {/* Image */}
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-          }}
-        >
+        <View style={{ display: "flex", flexDirection: "row" }}>
           <TouchableOpacity className="bg-black/5 rounded-full p-1">
             <Ionicons name="call" size={hp(3)} color="black" />
           </TouchableOpacity>
@@ -230,14 +223,14 @@ const ChatRoomScreen = ({ route }) => {
       </View>
 
       {/* Chat Details */}
-      <View className="w-full h-full">
-        <Text className="text-center text-neutral-400 pt-4">Today</Text>
+      <View
+        className="w-full h-full pt-10
+      pb-20"
+      >
         <FlatList
+          ref={flatListRef}
           data={messagesData}
           keyExtractor={(item, index) => index.toString()}
-          contentContainerStyle={{
-            paddingBottom: hp(15),
-          }}
           renderItem={({ item }) => (
             <View
               style={{
@@ -248,8 +241,6 @@ const ChatRoomScreen = ({ route }) => {
             >
               <View
                 style={{
-                  // width: checkIsSender(item) ? "60%" : "70%",
-                  display: "flex",
                   flexDirection: checkIsSender(item) ? "row-reverse" : "row",
                   width: "auto",
                   maxWidth: checkIsSender(item) ? "70%" : "70%",
@@ -259,20 +250,14 @@ const ChatRoomScreen = ({ route }) => {
                 {!checkIsSender(item) ? (
                   <Image
                     source={{ uri: avatar }}
-                    style={{
-                      width: hp(3),
-                      height: hp(3),
-                      marginRight: 12,
-                    }}
+                    style={{ width: hp(3), height: hp(3), marginRight: 12 }}
                     className="rounded-full"
                   />
-                ) : (
-                  <></>
-                )}
+                ) : null}
 
-                {item?._id === "-1" ? (
+                {item._id === "-1" ? (
                   <View>
-                    <Text className="text-white text-base leading-5 ">
+                    <Text className="text-white text-base leading-5">
                       {item.content}
                     </Text>
                   </View>
@@ -288,49 +273,46 @@ const ChatRoomScreen = ({ route }) => {
                       borderRadius: 10,
                     }}
                   >
-                    <Text className="text-white text-base leading-5 ">
+                    <Text className="text-white text-base leading-5">
                       {item.content}
                     </Text>
                   </View>
                 )}
-
-                {/* {checkIsSender(item) && (
-                  <Text className="text-xs font-semibold text-neutral-500 text-right">
-                    {"Read "}
-                    {item.timestamp}
-                  </Text>
-                )} */}
               </View>
             </View>
           )}
+          onContentSizeChange={scrollToBottom}
         />
       </View>
 
-      {/* Text Input  */}
+      {/* Text Input */}
 
-      <View className="absolute flex-row justify-between items-center w-full px-4 pb-12 pt-2 bg-white bottom-0">
-        <View className="flex-row items-center rounded-2xl bg-neutral-200 px-3 py-3 w-[85%] ">
+      <View className="absolute flex-row justify-between items-center w-full px-4 pb-3 bg-white bottom-0">
+        <KeyboardAvoidingView
+          className="flex-row items-center rounded-2xl bg-neutral-200 px-3 py-3 w-[85%]"
+          behavior={"padding"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 300 : 330}
+        >
           <TextInput
             placeholder="Write your message here"
             placeholderTextColor={"gray"}
             style={{
               fontSize: hp(1.7),
               fontWeight: "medium",
+              height: "100%",
             }}
-            className="flex-1 text-base mb-1 pl-1 tracking-wider"
+            className="flex-1 text-base pl-1 pb-2 mb-1 tracking-wider"
             value={message}
             onChangeText={handleTyping}
           />
-
           <View className="flex-row justify-center items-center space-x-1">
             <PhotoIcon color={"gray"} strokeWidth={2} />
             <FaceSmileIcon size={hp(2.5)} color={"gray"} strokeWidth={2} />
           </View>
-        </View>
-
+        </KeyboardAvoidingView>
         <TouchableOpacity
-          onPress={() => handleSentMessage()}
-          className="bg-blue-500 rounded-2xl py-3 w-[13%] justify-center items-center "
+          onPress={handleSentMessage}
+          className="bg-blue-500 rounded-2xl py-3 w-[13%] justify-center items-center"
         >
           <PaperAirplaneIcon color={"white"} />
         </TouchableOpacity>

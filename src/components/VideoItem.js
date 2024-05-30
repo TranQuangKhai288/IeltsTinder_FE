@@ -10,7 +10,6 @@ import {
   FlatList,
   TextInput,
   KeyboardAvoidingView,
-  Keyboard,
   Platform,
 } from "react-native";
 import { Video } from "expo-av";
@@ -22,7 +21,7 @@ import BottomSheet from "@gorhom/bottom-sheet";
 import * as PostService from "../apis/PostService";
 import { ScrollView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
+import { useSelector } from "react-redux";
 
 const android = Platform.OS === "android";
 const windowWidth = Dimensions.get("window").width;
@@ -34,10 +33,15 @@ const VideoItem = ({ data, isActive }) => {
   const [isPaused, setIsPaused] = useState(false);
   const [showFullText, setShowFullText] = useState(false);
   const [comments, setComments] = useState([]);
+  const [countComment, setCountComment] = useState(data.countComment);
+  const [input, setInput] = useState("");
+
   const sheetRef = useRef(null);
   const flatListRef = useRef(null);
   const bottomTabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
+  const access_token = useSelector((state) => state.user.access_token);
+  const user = useSelector((state) => state.user.userData);
   const handleScroll = (event) => {
     const { contentOffset, layoutMeasurement } = event.nativeEvent;
     const currentIndex = Math.round(contentOffset.x / layoutMeasurement.width);
@@ -50,87 +54,30 @@ const VideoItem = ({ data, isActive }) => {
 
   const handleComment = async () => {
     sheetRef.current?.expand();
-
     const res = await PostService.getAllCommentsofAPost(data._id);
     if (res.status === "OK") {
       setComments(res.data);
     }
   };
 
-  const navigation = useNavigation();
-
-  const handleOtherProfile = (data) => {
-    const id = data.user._id;
-    navigation.navigate("OtherProfileScreen", { id });
-  };
-
-  const renderComment = () => {
-    return (
-      <View
-        style={{
-          width: "100%",
-          height: "100%",
-        }}
-      >
-        {/* title */}
-        <Text
-          style={{
-            textAlign: "center",
-            width: "100%",
-            fontSize: 14,
-            fontWeight: "600",
-          }}
-        >
-          {data.countComment} Comments
-        </Text>
-        {/* comments */}
-
-        <ScrollView style={{ marginBottom: 50 }}>
-          {comments.map((comment, index) => {
-            return (
-              <CommentComponent
-                key={index}
-                name={comment.user.name}
-                content={comment.content}
-                avatar={comment.user.avatar}
-                createdAt={comment.createdAt}
-              />
-            );
-          })}
-        </ScrollView>
-
-        {/* input */}
-        <KeyboardAvoidingView
-          style={styles.inputWrapper}
-          behavior={"padding"}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 300 : 300}
-        >
-          <View
-            style={{
-              width: 38,
-              height: 38,
-              borderRadius: 100,
-              margin: 6,
-            }}
-          >
-            <Image
-              source={{ uri: data.user.avatar }}
-              style={{
-                width: "100%",
-                height: "100%",
-                resizeMode: "cover",
-                borderRadius: 100,
-              }}
-            />
-          </View>
-          <TextInput placeholder="Add a comment..." style={styles.input} />
-          <TouchableOpacity style={styles.sendButton}>
-            <Ionic name="send" style={{ fontSize: 20 }} />
-          </TouchableOpacity>
-        </KeyboardAvoidingView>
-      </View>
+  const handleSentComment = async () => {
+    const dataSentComment = {
+      content: input,
+      media: [],
+    };
+    const res = await PostService.postComment(
+      data._id,
+      dataSentComment,
+      access_token
     );
+    if (res.status === "OK") {
+      const newComment = res.data;
+      setComments([...comments, newComment]);
+      setCountComment(countComment + 1);
+      setInput("");
+    }
   };
+
   return (
     <View
       style={[
@@ -234,12 +181,7 @@ const VideoItem = ({ data, isActive }) => {
         }}
       >
         <View>
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={() => {
-              handleOtherProfile(data);
-            }}
-          >
+          <TouchableOpacity activeOpacity={1}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <View
                 style={{
@@ -444,7 +386,75 @@ const VideoItem = ({ data, isActive }) => {
       </View>
 
       <BottomSheet ref={sheetRef} index={-1} snapPoints={[0.05, "70%"]}>
-        {renderComment}
+        <View
+          style={{
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          {/* title */}
+          <Text
+            style={{
+              textAlign: "center",
+              width: "100%",
+              fontSize: 14,
+              fontWeight: "600",
+            }}
+          >
+            {countComment} Comments
+          </Text>
+          {/* comments */}
+          <ScrollView style={{ marginBottom: 50 }}>
+            {comments.map((comment, index) => {
+              return (
+                <CommentComponent
+                  key={index}
+                  name={comment.user.name}
+                  content={comment.content}
+                  avatar={comment.user.avatar}
+                  createdAt={comment.createdAt}
+                />
+              );
+            })}
+          </ScrollView>
+          {/* input */}
+          <KeyboardAvoidingView
+            style={styles.inputWrapper}
+            behavior={"padding"}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 300 : 330}
+          >
+            <View
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 100,
+                margin: 6,
+              }}
+            >
+              <Image
+                source={{ uri: user.avatar }}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  resizeMode: "cover",
+                  borderRadius: 100,
+                }}
+              />
+            </View>
+            <TextInput
+              placeholder="Add a comment..."
+              style={styles.input}
+              value={input}
+              onChangeText={setInput}
+            />
+            <TouchableOpacity
+              style={styles.sendButton}
+              onPress={() => handleSentComment()}
+            >
+              <Ionic name="send" style={{ fontSize: 20 }} />
+            </TouchableOpacity>
+          </KeyboardAvoidingView>
+        </View>
       </BottomSheet>
     </View>
   );
