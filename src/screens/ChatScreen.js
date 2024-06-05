@@ -77,71 +77,75 @@ const ChatScreen = () => {
           </Text>
         </View>
 
-        <FlatList
-          data={chatList}
-          keyExtractor={(item) => item._id}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              className="w-full py-3 items-center flex-row border-b  border-neutral-300"
-              onPress={() => handleChatRoom(item)}
-            >
-              {/* Avatar */}
-              <View
-                className="w-[17%] justify-center"
-                style={{
-                  width: hp(7),
-                  height: hp(7),
-                }}
+        {chatList.length ? (
+          <FlatList
+            data={chatList}
+            keyExtractor={(item) => item._id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                className="w-full py-3 items-center flex-row border-b  border-neutral-300"
+                onPress={() => handleChatRoom(item)}
               >
-                <Image
-                  source={{ uri: checkAvatarofChat(item) }}
+                {/* Avatar */}
+                <View
+                  className="w-[17%] justify-center"
                   style={{
-                    width: "90%",
-                    height: "90%",
+                    width: hp(7),
+                    height: hp(7),
                   }}
-                  className="rounded-full"
-                />
-              </View>
+                >
+                  <Image
+                    source={{ uri: checkAvatarofChat(item) }}
+                    style={{
+                      width: "90%",
+                      height: "90%",
+                    }}
+                    className="rounded-full"
+                  />
+                </View>
 
-              {/* Information */}
-              <View
-                className="w-[82%]"
-                style={{
-                  height: hp(6),
-                }}
-              >
-                <View className="flex-row justify-between items-center">
-                  <View className="flex-row justify-center">
-                    <View className="flex-row">
-                      <Text className="font-bold text-base  ">
-                        {!item.isGroupChat
-                          ? checkNameofChat(item)
-                          : item.chatName}
-                      </Text>
-                    </View>
-                    {item.isOnline && (
-                      <View className=" justify-center items-center">
-                        <View className="w-2 h-2 bg-[#F26322] rounded-full ml-1 justify-center items-center"></View>
+                {/* Information */}
+                <View
+                  className="w-[82%]"
+                  style={{
+                    height: hp(6),
+                  }}
+                >
+                  <View className="flex-row justify-between items-center">
+                    <View className="flex-row justify-center">
+                      <View className="flex-row">
+                        <Text className="font-bold text-base  ">
+                          {!item.isGroupChat
+                            ? checkNameofChat(item)
+                            : item.chatName}
+                        </Text>
                       </View>
-                    )}
+                      {item.isOnline && (
+                        <View className=" justify-center items-center">
+                          <View className="w-2 h-2 bg-[#F26322] rounded-full ml-1 justify-center items-center"></View>
+                        </View>
+                      )}
+                    </View>
+                    <Text className="text-sm tracking-tight">
+                      {item.timeSent}
+                    </Text>
                   </View>
-                  <Text className="text-sm tracking-tight">
-                    {item.timeSent}
-                  </Text>
+                  <View>
+                    <Text className="font-semibold text-xs text-neutral-500">
+                      {item.latestMessage
+                        ? item.latestMessage.content.length > 45
+                          ? item.latestMessagecontent.slice(0, 45) + "..."
+                          : item.latestMessage.content
+                        : "Giờ đây các bạn đã được kết nối với nhau"}
+                    </Text>
+                  </View>
                 </View>
-                <View>
-                  <Text className="font-semibold text-xs text-neutral-500">
-                    {item.latestMessage
-                      ? item.latestMessage.content.length > 45
-                        ? item.latestMessagecontent.slice(0, 45) + "..."
-                        : item.latestMessage.content
-                      : "Giờ đây các bạn đã được kết nối với nhau"}
-                  </Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          )}
-        />
+              </TouchableOpacity>
+            )}
+          />
+        ) : (
+          <Text>No chat found</Text>
+        )}
       </View>
     </SafeAreaView>
   );

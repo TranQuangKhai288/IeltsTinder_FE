@@ -15,27 +15,48 @@ import { FontAwesome } from "@expo/vector-icons";
 import LinearGradient from "react-native-linear-gradient";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
-const LoginScreen = ({ navigation }) => {
+const RegisterScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [isShowPassword, setIsShowPassword] = useState(false);
-  const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
-  const handleLogin = async () => {
+  const handleRegister = async () => {
     const data = {
+      name: name,
       email: email,
       password: password,
+      confirmPassword: confirmPassword,
+      phoneNumber: phoneNumber,
     };
+    if (
+      password === "" ||
+      confirmPassword === "" ||
+      name === "" ||
+      email === "" ||
+      phoneNumber === ""
+    ) {
+      alert("Please check your input");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      alert("Password and confirm password must be the same");
+      return;
+    }
+
     try {
-      const response = await UserServices.loginUser(data);
+      const response = await UserServices.registerUser(data);
       if (response.status === "OK") {
-        alert("Đăng nhập thành công");
-        navigation.navigate("BottomTab");
-        dispatch(getDetailsUser(response));
-        dispatch(getChatList(response.access_token));
+        alert("Register successfully");
+        navigation.navigate("LoginScreen");
       } else {
-        alert("Login failed because " + response.message);
+        alert("Register failed " + response.message);
       }
+      dispatch(getDetailsUser(response));
+      dispatch(getChatList(response.access_token));
     } catch (error) {
       console.log(error);
     }
@@ -50,10 +71,10 @@ const LoginScreen = ({ navigation }) => {
         />
       </View>
       <View style={styles.helloContainer}>
-        <Text style={styles.helloText}>Hello</Text>
+        <Text style={styles.helloText}>Register</Text>
       </View>
       <View>
-        <Text style={styles.signInText}>Sign in to your account</Text>
+        <Text style={styles.signUpText}>Sign up for more feature</Text>
       </View>
 
       <View style={[styles.inputContainer, { marginTop: 40 }]}>
@@ -73,13 +94,44 @@ const LoginScreen = ({ navigation }) => {
 
       <View style={styles.inputContainer}>
         <FontAwesome
-          name="lock"
+          name="user"
           size={24}
           color="#9A9A9A"
           style={{ marginLeft: 16 }}
         />
         <TextInput
           style={styles.textInput}
+          placeholder="Username"
+          value={name}
+          onChangeText={setName}
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <FontAwesome
+          name="phone"
+          size={24}
+          color="#9A9A9A"
+          style={{ marginLeft: 16 }}
+        />
+        <TextInput
+          style={styles.textInput}
+          placeholder="Phone number"
+          keyboardType="numeric"
+          value={phoneNumber}
+          onChangeText={setPhoneNumber}
+        />
+      </View>
+
+      <View style={[styles.inputContainer]}>
+        <FontAwesome
+          name="lock"
+          size={24}
+          color="#9A9A9A"
+          style={{ marginLeft: 16 }}
+        />
+        <TextInput
+          style={[styles.textInput]}
           placeholder="Password"
           value={password}
           onChangeText={setPassword}
@@ -108,27 +160,62 @@ const LoginScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.signInButtonContainer}>
-        <Text style={styles.signIn}>Login</Text>
-        <TouchableOpacity onPress={handleLogin}>
-          <LinearGradient
-            colors={["#F97794", "#623AA2"]}
-            style={styles.linearGradient}
-          >
-            <View>
-              <FontAwesome name="arrow-right" size={24} color="#FFFFFF" />
-            </View>
-          </LinearGradient>
+      <View style={styles.inputContainer}>
+        <FontAwesome
+          name="lock"
+          size={24}
+          color="#9A9A9A"
+          style={{ marginLeft: 16 }}
+        />
+        <TextInput
+          style={styles.textInput}
+          placeholder="Confirm password"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry={isShowPassword}
+        />
+        <TouchableOpacity onPress={() => setIsShowPassword(!isShowPassword)}>
+          {isShowPassword ? (
+            <FontAwesome
+              name="eye"
+              size={24}
+              color="#9A9A9A"
+              style={{
+                marginRight: 24,
+              }}
+            />
+          ) : (
+            <FontAwesome
+              name="eye-slash"
+              size={24}
+              color="#9A9A9A"
+              style={{
+                marginRight: 24,
+              }}
+            />
+          )}
         </TouchableOpacity>
       </View>
 
+      <View style={styles.signUpButtonContainer}>
+        <Text style={styles.signUp}>Register</Text>
+        <LinearGradient
+          colors={["#F97794", "#623AA2"]}
+          style={styles.linearGradient}
+        >
+          <TouchableOpacity onPress={handleRegister}>
+            <FontAwesome name="arrow-right" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+        </LinearGradient>
+      </View>
+
       <Text style={styles.footerText}>
-        Don't have an account?{" "}
+        Already have an account?{" "}
         <Text
           style={{ color: "#F97794", textDecorationLine: "underline" }}
-          onPress={() => navigation.navigate("RegisterScreen")}
+          onPress={() => navigation.navigate("LoginScreen")}
         >
-          Sign up
+          Sign in
         </Text>
       </Text>
 
@@ -160,7 +247,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#262626",
   },
-  signInText: {
+  signUpText: {
     textAlign: "center",
     fontSize: 18,
     color: "#262626",
@@ -184,7 +271,7 @@ const styles = StyleSheet.create({
     color: "#262626",
   },
 
-  signInButtonContainer: {
+  signUpButtonContainer: {
     justifyContent: "flex-end",
     flexDirection: "row",
     width: "80%",
@@ -200,7 +287,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
 
-  signIn: {
+  signUp: {
     color: "#262626",
     fontSize: 25,
     fontWeight: "bold",
@@ -212,13 +299,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 16,
     color: "#262626",
-    bottom: 150,
+    bottom: 80,
   },
 
   bottomImageContainer: {
     position: "absolute",
+    zIndex: -1,
     bottom: -16,
-    left: -32,
+    left: -64,
   },
 
   bottomImage: {
@@ -227,4 +315,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginScreen;
+export default RegisterScreen;

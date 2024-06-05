@@ -3,6 +3,7 @@ import { Alert } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 import BottomTab from "./BottomTab";
 import LoginScreen from "../screens/LoginScreen";
+import RegisterScreen from "../screens/RegisterScreen";
 import WelcomeScreen from "../screens/WelcomeScreen";
 import ChatRoomScreen from "../screens/ChatRoomScreen";
 import VideoCallScreen from "../screens/VideoCallScreen";
@@ -46,6 +47,7 @@ const Stack = () => {
     >
       <stack.Screen name="BottomTab" component={BottomTab} />
       <stack.Screen name="LoginScreen" component={LoginScreen} />
+      <stack.Screen name="RegisterScreen" component={RegisterScreen} />
       <stack.Screen name="WelcomeScreen" component={WelcomeScreen} />
       <stack.Screen name="ChatRoomScreen" component={ChatRoomScreen} />
       <stack.Screen name="VideoCallScreen" component={VideoCallScreen} />

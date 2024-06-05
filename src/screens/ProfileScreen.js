@@ -113,7 +113,7 @@ const ProfileScreen = ({ route }) => {
           id={userId}
           name={user?.name}
           accountName={user?.name}
-          profileImage={user?.level}
+          profileImage={user?.avatar}
         />
       </View>
       <View>
