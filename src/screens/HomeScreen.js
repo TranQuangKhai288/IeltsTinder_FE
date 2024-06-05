@@ -3,39 +3,60 @@ import {
   Text,
   Dimensions,
   TouchableOpacity,
-  Image,
   FlatList,
   StyleSheet,
 } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useSelector } from "react-redux";
-
-const android = Platform.OS === "android";
-const { width, height } = Dimensions.get("window");
-import { data } from "../data/Data";
-import VideoItem from "../components/VideoItem";
+import { Platform } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import * as PostService from "../apis/PostService";
+import VideoItem from "../components/VideoItem";
+
+const android = Platform.OS === "android";
+const { width, height } = Dimensions.get("window");
+
 const HomeScreen = () => {
   const user = useSelector((state) => state.user.userData);
   const [activeVideoIndex, setActiveVideoIndex] = useState(0);
   const bottomTabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
 
-  const fetchPosts = async () => {
-    const res = await PostService.getAll();
-    setPosts(res.data);
+  const fetchPosts = async (page) => {
+    setLoading(true);
+    const res = await PostService.getAll(page);
+    setPosts((prevPosts) => [...prevPosts, ...res.data]);
+    setLoading(false);
   };
 
   useEffect(() => {
-    fetchPosts();
-  }, []);
+    fetchPosts(page);
+  }, [page]);
 
   const navigation = useNavigation();
+
+  const handleScroll = useCallback(
+    (event) => {
+      const index = Math.round(
+        event.nativeEvent.contentOffset.y / (height - bottomTabBarHeight)
+      );
+      setActiveVideoIndex(index);
+    },
+    [bottomTabBarHeight]
+  );
+
+  const handleEndReached = () => {
+    if (!loading) {
+      setPage((prevPage) => prevPage + 1);
+    }
+  };
+
   return (
     <View>
       <View
@@ -89,34 +110,18 @@ const HomeScreen = () => {
       <FlatList
         data={posts}
         pagingEnabled
-        bar
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => (
-          <VideoItem
-            data={item}
-            isActive={activeVideoIndex === index}
-            key={index}
-          />
+          <VideoItem data={item} isActive={activeVideoIndex === index} />
         )}
-        onScroll={(event) => {
-          const index = Math.round(
-            event.nativeEvent.contentOffset.y / (height - bottomTabBarHeight)
-          );
-          setActiveVideoIndex(index);
-        }}
+        onScroll={handleScroll}
+        onEndReached={handleEndReached}
+        onEndReachedThreshold={0.5}
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
       />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    width: width,
-    height: height,
-    backgroundColor: "red",
-  },
-});
 
 export default HomeScreen;

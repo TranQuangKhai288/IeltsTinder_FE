@@ -294,7 +294,6 @@ const CreatePostScreen = () => {
       );
 
       setUploading(false);
-      Alert.alert("Success", "Files uploaded");
 
       // Trả về một mảng chứa đường dẫn tải xuống của tất cả các ảnh
       return media;
@@ -312,6 +311,22 @@ const CreatePostScreen = () => {
 
     console.log("Media", media);
     const response = await PostSerVice.addAPost(content, media, access_token);
+    if (response.status === "OK") {
+      Alert.alert("Success", "Post successfully", [
+        {
+          text: "OK",
+          onPress: () => {
+            navigation.goBack();
+          },
+        },
+      ]);
+    } else {
+      Alert.alert("Error", "Post failed", [
+        {
+          text: "OK",
+        },
+      ]);
+    }
   };
 
   return (

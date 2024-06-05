@@ -22,6 +22,7 @@ import * as PostService from "../apis/PostService";
 import { ScrollView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
 
 const android = Platform.OS === "android";
 const windowWidth = Dimensions.get("window").width;
@@ -35,7 +36,7 @@ const VideoItem = ({ data, isActive }) => {
   const [comments, setComments] = useState([]);
   const [countComment, setCountComment] = useState(data.countComment);
   const [input, setInput] = useState("");
-
+  const navigation = useNavigation();
   const sheetRef = useRef(null);
   const flatListRef = useRef(null);
   const bottomTabBarHeight = useBottomTabBarHeight();
@@ -76,6 +77,11 @@ const VideoItem = ({ data, isActive }) => {
       setCountComment(countComment + 1);
       setInput("");
     }
+  };
+
+  const handleOtherProfile = (data) => {
+    const id = data.user._id;
+    navigation.navigate("OtherProfileScreen", { id });
   };
 
   return (
@@ -181,7 +187,12 @@ const VideoItem = ({ data, isActive }) => {
         }}
       >
         <View>
-          <TouchableOpacity activeOpacity={1}>
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => {
+              handleOtherProfile(data);
+            }}
+          >
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <View
                 style={{
@@ -232,9 +243,7 @@ const VideoItem = ({ data, isActive }) => {
               numberOfLines={showFullText ? undefined : 2} // Chỉ hiển thị tối đa 2 dòng
               ellipsizeMode="tail" // Hiển thị dấu ... khi văn bản bị cắt
             >
-              Tran quang khai Tran quang khai Tran quang khai Tran quang khai
-              Tran quang khai Tran quang khai
-              {/* {data.content} */}
+              {data.content}
             </Text>
           </View>
           <View

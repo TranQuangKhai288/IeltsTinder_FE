@@ -78,7 +78,6 @@ const ProfileScreen = ({ route }) => {
       ));
       setCirculs(newCirculs);
     };
-
     fetchFriendsData();
   }, []);
 
@@ -124,7 +123,7 @@ const ProfileScreen = ({ route }) => {
             fontSize: 14,
           }}
         >
-          Friends
+          List Friends
         </Text>
         <ScrollView
           horizontal={true}
