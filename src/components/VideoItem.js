@@ -30,6 +30,7 @@ const windowHeight = Dimensions.get("window").height;
 
 const VideoItem = ({ data, isActive }) => {
   const [like, setLike] = useState(false);
+  const [countLike, setCountLike] = useState(data.countLike);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [showFullText, setShowFullText] = useState(false);
@@ -82,6 +83,23 @@ const VideoItem = ({ data, isActive }) => {
   const handleOtherProfile = (data) => {
     const id = data.user._id;
     navigation.navigate("OtherProfileScreen", { id });
+  };
+
+  const handleLike = async () => {
+    if (like) {
+      const res = await PostService.unlikePost(data._id, access_token);
+      if (res.status === "OK") {
+        console.log("Unlike success");
+      }
+      setCountLike(countLike - 1);
+    } else {
+      const res = await PostService.likePost(data._id, access_token);
+      if (res.status === "OK") {
+        console.log("Like success");
+      }
+      setCountLike(countLike + 1);
+    }
+    setLike(!like);
   };
 
   return (
@@ -355,14 +373,16 @@ const VideoItem = ({ data, isActive }) => {
 
         {/* like */}
         <TouchableOpacity
-          onPress={() => setLike(!like)}
+          onPress={() => {
+            handleLike();
+          }}
           style={styles.bottomRightSection}
         >
           <AntDesign
             name={like ? "heart" : "hearto"}
             style={{ color: like ? "red" : "white", fontSize: 30 }}
           />
-          <Text style={{ color: "white" }}>{data.countLike}</Text>
+          <Text style={{ color: "white" }}>{countLike}</Text>
         </TouchableOpacity>
 
         {/* comment */}

@@ -45,3 +45,30 @@ export const postComment = async (postId, data, access_token) => {
   );
   return res;
 };
+
+export const likePost = async (postId, access_token) => {
+  const res = await baseURL.post(
+    `/post/like/${postId}`,
+    {},
+    {
+      headers: {
+        token: `Bearer ${access_token}`,
+      },
+    }
+  );
+  return res;
+};
+
+export const unlikePost = async (postId, access_token) => {
+  const res = await baseURL.post(
+    `/post/unlike/${postId}`,
+    {},
+    {
+      headers: {
+        token: `Bearer ${access_token}`,
+      },
+    }
+  );
+  console.log("unLike", res);
+  return res;
+};
