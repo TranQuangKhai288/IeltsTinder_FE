@@ -1,7 +1,15 @@
-import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Alert,
+} from "react-native";
 import React, { useState } from "react";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { useSelector } from "react-redux";
+import * as UserService from "../apis/UserService";
 
 const FriendRequest = ({ id, name, level, avatar }) => {
   const access_token = useSelector((state) => state.user.access_token);
@@ -9,19 +17,20 @@ const FriendRequest = ({ id, name, level, avatar }) => {
   const [status, setStatus] = useState("pending");
 
   const handleComfirmFriendRequest = async () => {
-    // Confirm friend request
-    // const response = await UserService.acceptFriendRequest(id, access_token);
-    // if (response.status === "OK") {
-    //   console.log("Friend request accepted");
-    // }
-    console.log("Confirm friend request", id);
-    setStatus("confirmed");
+    //Confirm friend request
+    const response = await UserService.acceptFriendRequest(id, access_token);
+    if (response.status === "OK") {
+      setStatus("confirmed");
+    }
   };
 
   const handleRejectFriendRequest = async () => {
     // Reject friend request
-    console.log("Reject friend request", id);
-    setStatus("rejected");
+    const response = await UserService.rejectFriendRequest(id, access_token);
+    console.log(response);
+    if (response.status === "OK") {
+      setStatus("rejected");
+    }
   };
 
   const Button = () => {

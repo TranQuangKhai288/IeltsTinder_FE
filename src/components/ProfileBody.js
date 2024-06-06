@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import Feather from "react-native-vector-icons/Feather";
 import { useNavigation } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 import * as ChatService from "../apis/ChatService";
+import * as UserService from "../apis/UserService";
 export const ProfileBody = ({
   name,
   accountName,
@@ -112,13 +113,20 @@ export const ProfileBody = ({
   );
 };
 
-export const ProfileButtons = ({ id, name, accountName, profileImage }) => {
+export const ProfileButtons = ({
+  id,
+  name,
+  accountName,
+  profileImage,
+  isFriend,
+}) => {
   const access_token = useSelector((state) => state.user.access_token);
   const navigation = useNavigation();
-  const [follow, setFollow] = useState(follow);
+  const [follow, setFollow] = useState(false);
+  const [sending, setSending] = useState(false);
   const user = useSelector((state) => state.user.userData);
   const check = id === user._id ? 0 : 1;
-
+  console.log(isFriend, "isFriend here");
   const handleChatRoom = async () => {
     const response = await ChatService.accessChat(id, access_token);
 
@@ -143,6 +151,28 @@ export const ProfileButtons = ({ id, name, accountName, profileImage }) => {
         name: checkNameofChat(response.data),
         avatar: checkAvatarofChat(response.data),
       });
+    }
+  };
+
+  useEffect(() => {
+    if (isFriend) {
+      setFollow(true);
+    }
+  }, [isFriend]);
+
+  //check here is your friend or not
+  const handleFriendRequest = async () => {
+    //check list friend of user
+    if (!follow) {
+      //setFollow(true);
+
+      const response = await UserService.sendFriendRequest(id, access_token);
+      console.log("response", response);
+      if (response.status === "OK") {
+        setSending(true);
+        //setFollow(true);
+      }
+      //setCheckFriend(true);
     }
   };
 
@@ -205,7 +235,9 @@ export const ProfileButtons = ({ id, name, accountName, profileImage }) => {
           }}
         >
           <TouchableOpacity
-            onPress={() => setFollow(!follow)}
+            onPress={() => {
+              handleFriendRequest();
+            }}
             style={{ width: "42%" }}
           >
             <View
@@ -221,7 +253,7 @@ export const ProfileButtons = ({ id, name, accountName, profileImage }) => {
               }}
             >
               <Text style={{ color: follow ? "black" : "white" }}>
-                {follow ? "Following" : "Follow"}
+                {follow ? "Friend" : sending ? "Sending" : "Add Friend"}
               </Text>
             </View>
           </TouchableOpacity>

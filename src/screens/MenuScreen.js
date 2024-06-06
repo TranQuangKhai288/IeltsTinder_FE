@@ -6,23 +6,18 @@ import {
   TouchableOpacity,
   Dimensions,
 } from "react-native";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import Matches from "../components/matches";
-import { MagnifyingGlassIcon } from "react-native-heroicons/outline";
-import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { useNavigation } from "@react-navigation/native";
-import { useSelector } from "react-redux";
-import { datesData, matchesData } from "../dataTestUI";
+import { useSelector, useDispatch } from "react-redux";
 import FeatureComponent from "../components/FeatureComponent";
 import { ScrollView } from "react-native-gesture-handler";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 const { width, height } = Dimensions.get("window");
-import { ProfileBody, ProfileButtons } from "../components/ProfileBody";
-import { Feather } from "@expo/vector-icons";
+import * as UserServices from "../apis/UserService";
 
 const android = Platform.OS === "android";
 import {
@@ -33,6 +28,7 @@ import {
   history,
   match,
 } from "../assets/icon-feature";
+import { logout } from "../redux/slice/userSlice";
 
 const featureArray = [
   {
@@ -72,6 +68,7 @@ const MenuScreen = () => {
   const user = useSelector((state) => state.user.userData);
   const insets = useSafeAreaInsets();
   const bottomTabBarHeight = useBottomTabBarHeight();
+  const dispatch = useDispatch();
   return (
     <View
       style={{
@@ -178,7 +175,6 @@ const MenuScreen = () => {
         </View>
         {/* end of Features */}
 
-        {/* Support */}
         <TouchableOpacity
           style={{
             display: "flex",
@@ -189,6 +185,13 @@ const MenuScreen = () => {
             backgroundColor: "#333333",
             padding: 10,
             borderRadius: 10,
+          }}
+          onPress={async () => {
+            const res = await UserServices.logoutUser();
+            if (res.status === "OK") {
+              dispatch(logout());
+              navigation.navigate("LoginScreen");
+            }
           }}
         >
           <Text className=" px-4 font-semibold text-white tracking-wider text-xl">

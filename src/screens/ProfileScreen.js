@@ -11,7 +11,8 @@ import { useSelector } from "react-redux";
 
 const ProfileScreen = ({ route }) => {
   const [circuls, setCirculs] = useState([]);
-  const [anotherUser, setAnotherUser] = useState();
+  const [anotherUser, setAnotherUser] = useState(null);
+  const [isFriend, setIsFriend] = useState(false);
   const user = useSelector((state) => state.user.userData);
   const access_token = useSelector((state) => state.user.access_token);
 
@@ -23,34 +24,33 @@ const ProfileScreen = ({ route }) => {
   };
 
   const userId = route?.params?.id || user?._id;
+
   const fetchAnotherUser = async () => {
     const response = await UserServices.getDetailsUser(userId, access_token);
     if (response.status === "OK") {
       setAnotherUser(response.data);
     }
   };
+
   useEffect(() => {
     if (userId !== user?._id) fetchAnotherUser();
-  }, []);
+  }, [userId, user]);
 
-  // console.log(
-  //   JSON.stringify(anotherUser, (key, value) => {
-  //     if (key === "avatar") {
-  //       return "avatar uri";
-  //     }
-  //     return value;
-  //   })
-  // );
   useEffect(() => {
     const fetchFriendsData = async () => {
-      // Map over each friend ID and fetch their details concurrently
-      const friendDetailsPromises =
-        userId !== user?._id
-          ? anotherUser.friends.map((friendId) => fetchFriendDetails(friendId))
-          : user.friends.map((friendId) => fetchFriendDetails(friendId));
-      // Wait for all friend details to be fetched
+      const friendDetailsPromises = anotherUser
+        ? anotherUser.friends.map((friendId) => fetchFriendDetails(friendId))
+        : user.friends.map((friendId) => fetchFriendDetails(friendId));
+
       const friendDetails = await Promise.all(friendDetailsPromises);
-      // Push friend details into circuls array
+
+      // Check if the user is friend with the current user
+      if (anotherUser) {
+        setIsFriend(anotherUser.friends.includes(user._id));
+      } else {
+        setIsFriend(user.friends.includes(userId));
+      }
+
       const newCirculs = friendDetails.map((friendDetail, index) => (
         <View
           key={index}
@@ -78,8 +78,14 @@ const ProfileScreen = ({ route }) => {
       ));
       setCirculs(newCirculs);
     };
-    fetchFriendsData();
-  }, []);
+
+    if (
+      (userId !== user?._id && anotherUser) ||
+      (userId === user?._id && user)
+    ) {
+      fetchFriendsData();
+    }
+  }, [anotherUser, userId, user]);
 
   const insets = useSafeAreaInsets();
   return (
@@ -113,6 +119,7 @@ const ProfileScreen = ({ route }) => {
           name={user?.name}
           accountName={user?.name}
           profileImage={user?.avatar}
+          isFriend={isFriend}
         />
       </View>
       <View>

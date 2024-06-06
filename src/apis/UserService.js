@@ -64,6 +64,19 @@ export const acceptFriendRequest = async (id, access_token) => {
   return res;
 };
 
+export const rejectFriendRequest = async (id, access_token) => {
+  const res = await baseURL.post(
+    `/user/reject-friend-request`,
+    { senderId: id },
+    {
+      headers: {
+        token: `Bearer ${access_token}`,
+      },
+    }
+  );
+  return res;
+};
+
 export const getAllUser = async (access_token) => {
   const res = await baseURL.get(`/user/getAll`, {
     headers: {
