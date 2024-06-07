@@ -1,4 +1,15 @@
-# Social-Networking-App-Connect-EngLearner-React-Native
+# Language-Learning-Buddy-App-React-Native(Front-End)
+
+##Summary
+A mobile socical networking app for connect English learner
+###Feature
+- User:
+  + Login, Signup
+  + Post the video, image
+  + Chat and Call video
+  + Do exercise for level up
+  #### Randomly Match with suitable users
+
 
 ## Get Started
 
