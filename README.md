@@ -8,9 +8,11 @@ A mobile socical networking app for connect English learner
   + Post the video, image
   + Chat and Call video
   + Do exercise for level up
-  #### Randomly Match with suitable users
+  + Randomly Match with suitable users
 
-
+- Admin:
+  + User management
+  + Exercise management
 ## Get Started
 
 install dev dependencies
