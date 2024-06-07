@@ -1,8 +1,8 @@
 # Language-Learning-Buddy-App-React-Native(Front-End)
 
-##Summary
+## Summary
 A mobile socical networking app for connect English learner
-###Feature
+### Feature
 - User:
   + Login, Signup
   + Post the video, image
