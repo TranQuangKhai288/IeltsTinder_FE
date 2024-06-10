@@ -38,3 +38,17 @@ export const checkAnswer = async (id, answer, access_token) => {
   );
   return res;
 };
+
+export const levelUp = async (access_token) => {
+  console.log("level up");
+  const res = await baseURL.post(
+    `/exercise/level-up`,
+    {},
+    {
+      headers: {
+        token: `Bearer ${access_token}`,
+      },
+    }
+  );
+  return res;
+};

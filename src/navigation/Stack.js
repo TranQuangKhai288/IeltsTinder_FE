@@ -13,7 +13,7 @@ import PracticeScreen from "../screens/PracticeScreen";
 import EditProfile from "../screens/EditProfile";
 import CreatePostScreen from "../screens/CreateAPostScreen";
 import ProfileScreen from "../screens/ProfileScreen";
-
+import FirstComingStack from "./FirstComingStack";
 const stack = createStackNavigator();
 import {
   connectSocket,
@@ -21,6 +21,7 @@ import {
   setupSocket,
 } from "../socketIO/SocketService";
 import { useSelector } from "react-redux";
+
 import { getSocket } from "../socketIO/SocketService";
 
 const Stack = () => {
@@ -46,6 +47,7 @@ const Stack = () => {
       initialRouteName={user?.userData?._id ? "BottomTab" : "WelcomeScreen"}
     >
       <stack.Screen name="BottomTab" component={BottomTab} />
+      <stack.Screen name="FirstComingStack" component={FirstComingStack} />
       <stack.Screen name="LoginScreen" component={LoginScreen} />
       <stack.Screen name="RegisterScreen" component={RegisterScreen} />
       <stack.Screen name="WelcomeScreen" component={WelcomeScreen} />

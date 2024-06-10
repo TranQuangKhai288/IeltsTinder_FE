@@ -41,6 +41,7 @@ const initialState = {
     notification: [],
     exercises: [],
     schedule: [],
+    level: 0,
     isAdmin: false,
   },
   chatList: [],

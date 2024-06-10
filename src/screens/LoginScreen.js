@@ -29,10 +29,14 @@ const LoginScreen = ({ navigation }) => {
     try {
       const response = await UserServices.loginUser(data);
       if (response.status === "OK") {
-        alert("Đăng nhập thành công");
-        navigation.navigate("BottomTab");
+        alert("Login successfully");
         dispatch(getDetailsUser(response));
         dispatch(getChatList(response.access_token));
+        if (response.data.level === 0) {
+          navigation.navigate("FirstComingStack");
+        } else {
+          navigation.navigate("BottomTab");
+        }
       } else {
         alert("Login failed because " + response.message);
       }
